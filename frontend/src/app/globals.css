@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-bg: #0b0d18;
+  --color-side: #0f1120;
+  --color-panel: #151829;
+  --color-panel-2: #1c2036;
+  --color-line: #262a44;
+  --color-ink: #e8e9f3;
+  --color-muted: #8b8fa8;
+  --color-accent: #a855f7;
+  --color-accent-2: #7c3aed;
+
+  --color-low: #34d399;
+  --color-moderate: #fbbf24;
+  --color-high: #fb923c;
+  --color-critical: #f43f5e;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Thin scrollbars that match the dark panels. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2e3352 transparent;
+}
+
+.card {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card-hover:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  box-shadow: 0 0 24px -8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+.input {
+  width: 100%;
+  background: var(--color-panel-2);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: none;
+}
+.input:focus {
+  border-color: var(--color-accent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--color-accent);
+  color: white;
+  transition: filter 0.15s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow: 0 0 18px -4px var(--color-accent);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-ghost {
+  background: var(--color-panel-2);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+}
+.btn-ghost:hover:not(:disabled) {
+  box-shadow: none;
+  border-color: var(--color-accent);
+}
+
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, #171a2d 25%, #20243d 50%, #171a2d 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-low);
+}
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 2px solid var(--color-low);
+  animation: ping 1.6s ease-out infinite;
+}
+.live-dot.off {
+  background: var(--color-muted);
+}
+.live-dot.off::after {
+  display: none;
+}
+@keyframes ping {
+  from {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+.maplibregl-popup-content {
+  background: var(--color-panel-2) !important;
+  color: var(--color-ink) !important;
+  border: 1px solid var(--color-line);
+  border-radius: 10px !important;
+  font-size: 12px;
+  padding: 8px 10px !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: var(--color-panel-2) !important;
+  border-bottom-color: var(--color-panel-2) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+  .print-area {
+    border: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}

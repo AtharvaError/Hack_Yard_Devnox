@@ -1,0 +1,9 @@
+# Python
+backend/.venv/
+backend/.env
+backend/hackyard.db
+__pycache__/
+*.pyc
+
+# Node (frontend has its own .gitignore for node_modules and .next)
+node_modules/
