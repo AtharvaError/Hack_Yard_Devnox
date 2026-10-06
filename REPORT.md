@@ -203,6 +203,12 @@ number of dependent assets, then selected until the budget or crews run out.
    infrastructure visible, is damage visible, does it match the claim, severity estimate, is it
    inappropriate, confidence and a one-line reason. Providers rename and retire models often, so the checker
    asks the provider which models the key can use and settles on one that reads images.
+   - *Smaller copy for the AI:* vision models charge by image area, so the AI gets a reduced copy (a
+     report's photos share 600,000 pixels, about 890 x 670 for one photo) while the administrator still
+     sees the full 1600 px photo. A check costs about 2,200 tokens instead of about 8,000.
+   - *Usage limits:* if the provider says "slow down", the check waits for the limit to reset and asks
+     again (up to about a minute); the report shows "Checking photos…" meanwhile. A longer limit ends the
+     check with a note, and the administrator can press Re-check later.
 5. **Label for the administrator:**
 
 | Label | When |
@@ -254,6 +260,12 @@ Photo reports (over 70 automated checks plus a run through the form in the brows
   shapes was labelled likely irrelevant, and a hand-drawn picture of a flooded street was sent to needs
   review as not a real camera photo. The first attempt exposed that Groq had retired the vision models
   originally preset, which led to the automatic model discovery described above.
+- Usage limit, with the real Groq key: a user's report had come back "usage limit reached" because one
+  full-size photo used nearly the whole per-minute allowance (8,000 tokens). After the smaller-copy fix a
+  phone-sized photo cost 2,188 tokens, and three reports sent back to back were all AI-checked: the first
+  in 4 seconds, the next two after waiting 20 to 40 seconds for the limit to reset.
+- One report sent through the site by a user was labelled likely irrelevant at 98%, the AI describing the
+  upload as a screenshot of a video game.
 
 Not tested: **real photographs of damage** (only synthetic test images were used, so how well the model
 judges genuine photos, severity and borderline cases is unconfirmed), and **Grok (xAI) and Gemini keys**
@@ -266,8 +278,10 @@ permission).
 - **Photo screening is advice, not proof.** Photo metadata can be edited or missing (messaging apps strip
   it), AI models misjudge dark or blurry photos, and neither can tell a staged or AI-generated image
   reliably. That is why a person always decides.
-- **Free AI tiers have usage limits** and Grok from xAI is normally paid per use. When the limit is hit,
-  reports still arrive and show "Not AI-checked".
+- **Free AI tiers have usage limits** and Grok from xAI is normally paid per use. On a free Groq key the
+  vision model allows 8,000 tokens a minute and 1,000 requests a day, which is about two reports a minute
+  checked at once; more than that wait their turn for up to a minute. If the limit still has not cleared,
+  the report arrives anyway and shows "Not AI-checked" with a Re-check button.
 - **Photos are stored on the server's disk.** Free hosting often wipes local disks, so deployment needs
   object storage.
 
