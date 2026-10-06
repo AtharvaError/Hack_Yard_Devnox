@@ -2,6 +2,7 @@
 
 import hashlib
 import io
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -21,6 +22,9 @@ MAX_SIDE = 1600
 NEAR_DUPLICATE_BITS = 6  # dhash bits that may differ between two copies of the same photo
 FAR_FROM_PIN_M = 1000
 OLD_PHOTO_DAYS = 7
+AI_PIXEL_BUDGET = 600_000  # pixels sent to the AI per report, shared between its photos
+LIMIT_RETRIES = 2  # times to wait and ask again when the AI service says "slow down"
+LIMIT_MAX_WAIT_S = 70  # longer waits (daily limits) are not worth holding a check open for
 
 # Refuse absurdly large images before decoding them (Pillow raises at twice this many pixels).
 Image.MAX_IMAGE_PIXELS = 40_000_000
@@ -118,43 +122,105 @@ def basic_flags(db: Session, report: Report, photos: list[ReportPhoto]) -> list[
     return flags
 
 
+def ai_copies(images: list[bytes]) -> list[bytes]:
+    """Smaller copies of a report's photos for the AI; the stored originals are untouched.
+
+    Vision models charge by image area. On Groq a 1600 px photo costs about 8,000 tokens, which is
+    a free key's whole allowance for a minute, so full-size photos made the check fail. A report's
+    photos share one pixel budget, which keeps a check at roughly 3,500 tokens however many photos
+    it has. That is still ample detail to tell a flooded road from a selfie.
+    """
+    per_image = AI_PIXEL_BUDGET // max(len(images), 1)
+    copies = []
+    for data in images:
+        image = Image.open(io.BytesIO(data))
+        scale = (per_image / (image.width * image.height)) ** 0.5
+        if scale >= 1:
+            copies.append(data)
+            continue
+        size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
+        out = io.BytesIO()
+        image.convert("RGB").resize(size, Image.Resampling.LANCZOS).save(out, "JPEG", quality=85)
+        copies.append(out.getvalue())
+    return copies
+
+
+def _ask_ai(cfg: dict, images: list[bytes], damage_type: str, severity: str) -> dict:
+    """Asks the AI, waiting out a short usage limit instead of giving up at once."""
+    result = vision.check(cfg, images, damage_type, severity)
+    for _ in range(LIMIT_RETRIES):
+        wait = result.get("retry_after")
+        if result["ok"] or wait is None or wait > LIMIT_MAX_WAIT_S:
+            break
+        time.sleep(wait + 1)
+        result = vision.check(cfg, images, damage_type, severity)
+    return result
+
+
 def run_check(report_id: int) -> None:
     """Runs after the upload has been answered, so the citizen is never kept waiting on the AI."""
     with SessionLocal() as db:
         report = db.get(Report, report_id)
         if not report:
             return
-        photos = db.query(ReportPhoto).filter(ReportPhoto.report_id == report_id).all()
-        cfg = vision.settings()
-        report.check_confidence = None
-        if not cfg:
-            report.check_label = "unchecked"
-            report.check_source = "Basic checks"
-            report.check_reason = "No AI key is configured, so only the basic checks ran."
+        city_id, damage_type, severity, flags = report.city_id, report.category, report.severity, report.flags or []
+        file_names = [p.file_name for p in db.query(ReportPhoto).filter(ReportPhoto.report_id == report_id)]
+
+    # The AI call can take a while (it may wait for a usage limit to reset), so no database
+    # session is held open during it.
+    cfg = vision.settings()
+    update = {"check_confidence": None}
+    if not cfg:
+        update |= {
+            "check_label": "unchecked",
+            "check_source": "Basic checks",
+            "check_reason": "No AI key is configured, so only the basic checks ran.",
+        }
+    else:
+        images = [path.read_bytes() for name in file_names if (path := config.UPLOAD_DIR / name).exists()]
+        result = (
+            _ask_ai(cfg, ai_copies(images), damage_type, severity)
+            if images
+            else {"ok": False, "error": "the photo files are missing"}
+        )
+        if result["ok"]:
+            verdict = result["verdict"]
+            label, reason = vision.decide(verdict, flags)
+            if verdict["severity"] not in ("none", severity) and label != "inappropriate":
+                reason = f"{reason} AI severity estimate: {verdict['severity']}."
+            update |= {
+                "check_label": label,
+                "check_reason": reason[:300],
+                "check_confidence": verdict["confidence"],
+                "check_source": f"{cfg['name']} · {result['model']}"[:80],
+            }
         else:
-            images = []
-            for photo in photos:
-                path = config.UPLOAD_DIR / photo.file_name
-                if path.exists():
-                    images.append(path.read_bytes())
-            result = (
-                vision.check(cfg, images, report.category, report.severity)
-                if images
-                else {"ok": False, "error": "the photo files are missing"}
-            )
-            if result["ok"]:
-                verdict = result["verdict"]
-                report.check_label, reason = vision.decide(verdict, report.flags or [])
-                if verdict["severity"] not in ("none", report.severity) and report.check_label != "inappropriate":
-                    reason = f"{reason} AI severity estimate: {verdict['severity']}."
-                report.check_reason = reason[:300]
-                report.check_confidence = verdict["confidence"]
-                report.check_source = f"{cfg['name']} · {result['model']}"[:80]
-            else:
-                # The report stays in the queue either way; the administrator just gets less help.
-                report.check_label = "unchecked"
-                report.check_source = cfg["name"]
-                report.check_reason = f"AI check unavailable: {result['error']}."[:300]
-        city_id = report.city_id
+            # The report stays in the queue either way; the administrator just gets less help.
+            hint = " Press Re-check to try again." if result.get("transient") else ""
+            update |= {
+                "check_label": "unchecked",
+                "check_source": cfg["name"],
+                "check_reason": f"AI check unavailable: {result['error']}.{hint}"[:300],
+            }
+
+    with SessionLocal() as db:
+        report = db.get(Report, report_id)
+        if not report:
+            return
+        for field, value in update.items():
+            setattr(report, field, value)
         db.commit()
     hub.broadcast_from_thread({"type": "report_checked", "city_id": city_id})
+
+
+def reset_interrupted_checks() -> None:
+    """A check that was running when the backend stopped would otherwise show "checking" forever."""
+    with SessionLocal() as db:
+        db.query(Report).filter(Report.check_label == "pending").update(
+            {
+                "check_label": "unchecked",
+                "check_source": "",
+                "check_reason": "The photo check was interrupted by a restart. Press Re-check to run it again.",
+            }
+        )
+        db.commit()

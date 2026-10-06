@@ -10,7 +10,7 @@ from .db import Base, SessionLocal, add_missing_columns, engine
 from .live import hub
 from .models import City, User
 from .routers import admin, auth, city, community
-from .services import citydata
+from .services import citydata, photos
 
 
 def seed_demo_accounts() -> None:
@@ -52,6 +52,7 @@ async def lifespan(app: FastAPI):
     add_missing_columns()
     config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     seed_demo_accounts()
+    photos.reset_interrupted_checks()
     task = asyncio.create_task(refresh_loop())
     yield
     task.cancel()

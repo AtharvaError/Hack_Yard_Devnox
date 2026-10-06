@@ -57,6 +57,10 @@ Judge the photos together and reply with exactly this JSON:
   "reason": "one short sentence saying what the photos show"
 }}"""
 
+# One shared client: building a new one for every call costs most of a second (it reloads the
+# certificate store each time), which was a third of the time a check took.
+_http = httpx.Client(timeout=60)
+
 MAX_MODEL_ATTEMPTS = 8
 # Listed models that are certainly not chat models (speech, moderation, embeddings); never worth trying.
 NOT_CHAT = ("whisper", "tts", "orpheus", "speech", "guard", "embed", "rerank")
@@ -104,7 +108,7 @@ def _candidates(cfg: dict) -> list[str]:
     models = list(cfg["models"])
     if not config.VISION_MODEL:
         try:
-            res = httpx.get(f"{cfg['base']}/models", headers={"Authorization": f"Bearer {cfg['key']}"}, timeout=15)
+            res = _http.get(f"{cfg['base']}/models", headers={"Authorization": f"Bearer {cfg['key']}"}, timeout=15)
             listed = [m.get("id", "") for m in res.json().get("data", [])] if res.status_code == 200 else []
         except (httpx.HTTPError, ValueError):
             listed = []
@@ -154,8 +158,22 @@ def _parse(body: dict) -> dict | None:
         return None
 
 
+def _retry_after(res: httpx.Response) -> float | None:
+    """Seconds the provider asks us to wait after a 429, or None if it does not say."""
+    try:
+        return max(0.0, float(res.headers.get("retry-after", "")))
+    except ValueError:
+        pass
+    # Groq also puts it in the message: "Please try again in 7.66s" or "... in 1m26.4s".
+    match = re.search(r"try again in (?:(\d+)m)?([\d.]+)s", res.text)
+    return int(match.group(1) or 0) * 60 + float(match.group(2)) if match else None
+
+
 def check(cfg: dict, images: list[bytes], damage_type: str, severity: str) -> dict:
-    """Returns {"ok": True, "model", "verdict"} or {"ok": False, "error"}."""
+    """Returns {"ok": True, "model", "verdict"} or {"ok": False, "error"}.
+
+    A failure may also carry "transient" (worth trying again later) and "retry_after" (seconds).
+    """
     content: list[dict] = [{"type": "text", "text": USER_PROMPT.format(damage_type=damage_type, severity=severity)}]
     for image in images:
         encoded = base64.b64encode(image).decode()
@@ -165,20 +183,27 @@ def check(cfg: dict, images: list[bytes], damage_type: str, severity: str) -> di
     last_error = "no image-capable model was found for this key (set VISION_MODEL)"
     for model in _candidates(cfg):
         try:
-            res = httpx.post(
+            res = _http.post(
                 f"{cfg['base']}/chat/completions",
                 headers={"Authorization": f"Bearer {cfg['key']}"},
                 json={"model": model, "messages": messages},
-                timeout=60,
             )
         except httpx.HTTPError:
-            return {"ok": False, "error": "the AI service did not respond"}
+            return {"ok": False, "error": "the AI service did not respond", "transient": True}
         if res.status_code in (401, 403):
             return {"ok": False, "error": "the API key was rejected"}
         if res.status_code == 429:
-            return {"ok": False, "error": "the AI service's usage limit was reached"}
+            # Too many requests or tokens for now; `retry_after` lets the caller wait it out.
+            return {
+                "ok": False,
+                "error": "the AI service's usage limit was reached",
+                "transient": True,
+                "retry_after": _retry_after(res),
+            }
+        if res.status_code == 413:
+            return {"ok": False, "error": "the photos were more than the AI service accepts in one request"}
         if res.status_code >= 500:
-            return {"ok": False, "error": "the AI service is having problems"}
+            return {"ok": False, "error": "the AI service is having problems", "transient": True}
         if res.status_code != 200:
             # Usually "unknown model" or "this model cannot read images": try the next one.
             last_error = f"model {model} was refused (HTTP {res.status_code})"
