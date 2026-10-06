@@ -199,14 +199,16 @@ number of dependent assets, then selected until the budget or crews run out.
    - *Far from pin:* the photo was taken more than 1 km from the reported spot.
    - *Old photo:* the photo was taken more than 7 days before the report.
 4. **AI check (optional):** after the upload is answered, the photos and the claimed damage type go to the
-   configured vision model, which returns a structured answer: is public infrastructure visible, is damage
-   visible, does it match the claim, severity estimate, is it inappropriate, confidence and a one-line reason.
+   configured vision model, which returns a structured answer: is it a real camera photo, is public
+   infrastructure visible, is damage visible, does it match the claim, severity estimate, is it
+   inappropriate, confidence and a one-line reason. Providers rename and retire models often, so the checker
+   asks the provider which models the key can use and settles on one that reads images.
 5. **Label for the administrator:**
 
 | Label | When |
 |---|---|
 | Likely genuine | Damage is visible, matches the claim, confidence at least 60%, and the photo is not a duplicate |
-| Needs review | Damage is visible but does not match the claim, confidence is low, or the photo is a duplicate |
+| Needs review | Damage is visible but does not match the claim, confidence is low, the photo is a duplicate, or the image is a drawing, screenshot or computer-made picture rather than a camera photo |
 | Likely irrelevant | No public infrastructure or no damage is visible |
 | Inappropriate content | Photos stay blurred until the administrator chooses to look |
 | Not AI-checked | No key is set, or the AI service failed; the basic checks still apply |
@@ -232,7 +234,7 @@ Tested against live data for Pune and Kochi:
 - A verified citizen report raised the score of the two assets within 400 m.
 - Safe route returns a hospital, distance and time from a clicked point.
 
-Photo reports (63 automated checks plus a run through the form in the browser):
+Photo reports (over 70 automated checks plus a run through the form in the browser):
 
 - Uploads: a text file renamed `.jpg`, a GIF, an oversized file, four photos and no photos are all refused,
   and nothing is stored when a report is refused.
@@ -248,9 +250,16 @@ Photo reports (63 automated checks plus a run through the form in the browser):
 - In the browser: the form (pin, address auto-fill, severity, photo preview, send) and the administrator's
   queue (labels, flags, photo viewer, blurred inappropriate photos, verify).
 
-Not tested: **a real Grok, Groq or Gemini key.** The AI path was exercised only against the stand-in server,
-so the model names preset for each provider and the quality of real judgements are unconfirmed. Also not
-tested: the Gemini-written brief and the "Use my location" buttons (they need browser location permission).
+- With a real Groq key (model `qwen/qwen3.8-27b`, answers in 2 to 3 seconds): an image of random coloured
+  shapes was labelled likely irrelevant, and a hand-drawn picture of a flooded street was sent to needs
+  review as not a real camera photo. The first attempt exposed that Groq had retired the vision models
+  originally preset, which led to the automatic model discovery described above.
+
+Not tested: **real photographs of damage** (only synthetic test images were used, so how well the model
+judges genuine photos, severity and borderline cases is unconfirmed), and **Grok (xAI) and Gemini keys**
+(their preset model names are unconfirmed, though the checker falls back to whatever the key can use). Also
+not tested: the Gemini-written brief and the "Use my location" buttons (they need browser location
+permission).
 
 ## 10. Known limits
 
