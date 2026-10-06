@@ -153,7 +153,6 @@ export function ReportCard({
               ))}
             </ul>
           )}
-          {check.source && check.label !== "pending" && <p className="mt-1.5 text-[11px] text-muted">Checked by: {check.source}</p>}
         </div>
       )}
 
