@@ -1,15 +1,19 @@
 # Starts the backend (port 8000) and frontend (port 3000) in two new PowerShell windows.
-# First run only: creates the Python environment and installs dependencies.
+# Creates the Python environment on first run and installs any dependencies added since the last run.
 
 $root = $PSScriptRoot
 
 if (-not (Test-Path "$root\backend\.venv")) {
     Write-Host "Setting up the Python environment (first run only)..."
     py -3.12 -m venv "$root\backend\.venv"
-    & "$root\backend\.venv\Scripts\python.exe" -m pip install -r "$root\backend\requirements.txt"
 }
-if (-not (Test-Path "$root\frontend\node_modules")) {
-    Write-Host "Installing frontend packages (first run only)..."
+# Quick when everything is already installed; picks up packages added by an update.
+& "$root\backend\.venv\Scripts\python.exe" -m pip install -q --disable-pip-version-check -r "$root\backend\requirements.txt"
+
+$installed = "$root\frontend\node_modules\.package-lock.json"
+$wanted = "$root\frontend\package-lock.json"
+if (-not (Test-Path $installed) -or (Get-Item $wanted).LastWriteTime -gt (Get-Item $installed).LastWriteTime) {
+    Write-Host "Installing frontend packages..."
     Push-Location "$root\frontend"
     npm install
     Pop-Location

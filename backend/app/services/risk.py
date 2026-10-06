@@ -58,7 +58,7 @@ SCENARIOS = {
 }
 
 REPORT_RADIUS_M = 400
-REPORT_BUMP = 8
+REPORT_BUMP = {"minor": 4, "serious": 8, "dangerous": 12}  # points added per verified report
 REPORT_BUMP_MAX = 20
 
 
@@ -194,14 +194,15 @@ def score_assets(
             for h, v in by_hazard.items()
             if v >= 0.03
         ]
-        nearby = sum(
-            1 for r in verified if fast_dist_m(asset.lat, asset.lon, r.lat, r.lon) <= REPORT_RADIUS_M
-        )
+        nearby = [
+            r for r in verified if fast_dist_m(asset.lat, asset.lon, r.lat, r.lon) <= REPORT_RADIUS_M
+        ]
         if nearby:
-            bump = min(nearby * REPORT_BUMP, REPORT_BUMP_MAX)
+            # A more severe verified report counts for more.
+            bump = min(sum(REPORT_BUMP.get(r.severity, 8) for r in nearby), REPORT_BUMP_MAX)
             score = min(score + bump, 100)
             factors.append(
-                {"hazard": "reports", "points": bump, "why": f"{nearby} verified citizen report(s) within {REPORT_RADIUS_M} m"}
+                {"hazard": "reports", "points": bump, "why": f"{len(nearby)} verified citizen report(s) within {REPORT_RADIUS_M} m"}
             )
         factors.sort(key=lambda f: -f["points"])
         dominant = max(by_hazard, key=by_hazard.get) if score >= 1 else None

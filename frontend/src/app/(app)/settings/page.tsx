@@ -12,6 +12,7 @@ type Sources = {
   refresh_minutes: number;
   radius_km: number;
   ai_brief: string;
+  photo_check: string;
   sources: { name: string; use: string }[];
 };
 type AuditRow = { id: number; actor: string; action: string; detail: string; at: string };
@@ -74,9 +75,14 @@ function SettingsView() {
                     <td className="py-2.5 pr-3 font-medium">AI brief</td>
                     <td className="py-2.5 text-muted">{sources.data.ai_brief}</td>
                   </tr>
+                  <tr className="border-t border-line">
+                    <td className="py-2.5 pr-3 font-medium">Report photo check</td>
+                    <td className="py-2.5 text-muted">{sources.data.photo_check}</td>
+                  </tr>
                 </tbody>
               </table>
-              <p className="mt-3 text-xs text-muted">Every source is free and needs no API key.</p>
+              <p className="mt-3 text-xs text-muted">Every data source is free and needs no API key. The AI brief and the AI photo check are optional and use
+                your own key.</p>
             </>
           )}
         </Card>

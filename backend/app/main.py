@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
 from .auth import hash_password
-from .db import Base, SessionLocal, engine
+from .db import Base, SessionLocal, add_missing_columns, engine
 from .live import hub
 from .models import City, User
 from .routers import admin, auth, city, community
@@ -49,6 +49,8 @@ async def refresh_loop() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(engine)
+    add_missing_columns()
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     seed_demo_accounts()
     task = asyncio.create_task(refresh_loop())
     yield

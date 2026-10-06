@@ -8,10 +8,12 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+  // A FormData body (file uploads) is sent as-is so the browser sets the multipart boundary itself.
+  const isForm = options.body instanceof FormData;
   const res = await fetch(path, {
     method: options.method ?? (options.body ? "POST" : "GET"),
-    headers: options.body ? { "Content-Type": "application/json" } : undefined,
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    headers: options.body && !isForm ? { "Content-Type": "application/json" } : undefined,
+    body: isForm ? (options.body as FormData) : options.body ? JSON.stringify(options.body) : undefined,
     credentials: "same-origin",
   });
   if (!res.ok) {
@@ -140,15 +142,31 @@ export type Alert = {
   created_at: string;
 };
 
+export type Severity = "minor" | "serious" | "dangerous";
+export type CheckLabel = "pending" | "genuine" | "review" | "irrelevant" | "inappropriate" | "unchecked";
+
 export type Report = {
   id: number;
-  user_email: string;
   category: string;
+  severity: Severity;
   description: string;
+  address: string;
   lat: number;
   lon: number;
   status: "pending" | "verified" | "rejected";
   created_at: string;
+  photos: { id: number; url: string }[];
+  // Administrators only: who sent it and what the automatic photo check found.
+  user_email?: string;
+  check?: { label: CheckLabel; reason: string; confidence: number | null; source: string };
+  flags?: { code: string; text: string }[];
+};
+
+export type ReportOptions = {
+  damage_types: string[];
+  severities: Severity[];
+  max_photos: number;
+  photo_check: { enabled: boolean; name: string | null };
 };
 
 export type RouteResult = {

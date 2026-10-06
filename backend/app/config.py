@@ -37,3 +37,16 @@ CITY_RADIUS_KM = min(float(os.getenv("CITY_RADIUS_KM", "7")), 15.0)
 REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", "15"))
 
 USER_AGENT = "HackYardDemo/0.1 (hackathon prototype; localhost)"
+
+# Citizen report photos.
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads")))
+MAX_PHOTOS = 3
+MAX_PHOTO_BYTES = 5 * 1024 * 1024
+REPORTS_PER_DAY = int(os.getenv("REPORTS_PER_DAY", "10"))
+
+# AI photo check. The provider is worked out from the key (xai-… = Grok, gsk_… = Groq, AIza… = Gemini)
+# unless VISION_PROVIDER says otherwise. With no key, reports get the basic checks only.
+VISION_API_KEY = os.getenv("VISION_API_KEY", "")
+VISION_PROVIDER = os.getenv("VISION_PROVIDER", "").strip().lower()
+VISION_MODEL = os.getenv("VISION_MODEL", "").strip()
+VISION_BASE_URL = os.getenv("VISION_BASE_URL", "").strip().rstrip("/")

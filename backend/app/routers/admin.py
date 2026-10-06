@@ -8,6 +8,7 @@ from .. import config
 from ..auth import audit, require_admin
 from ..db import get_db
 from ..models import AuditLog, User
+from ..services import vision
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
@@ -45,10 +46,16 @@ def audit_log(admin: User = Depends(require_admin), db: Session = Depends(get_db
 
 @router.get("/sources")
 def sources(admin: User = Depends(require_admin)):
+    photo_check = vision.describe()
     return {
         "refresh_minutes": config.REFRESH_MINUTES,
         "radius_km": config.CITY_RADIUS_KM,
         "ai_brief": "Gemini (free tier)" if config.GEMINI_API_KEY else "Built-in template (no Gemini key set)",
+        "photo_check": (
+            f"{photo_check['name']}, plus duplicate and photo-metadata checks"
+            if photo_check["enabled"]
+            else "Duplicate and photo-metadata checks only (no AI key set)"
+        ),
         "sources": [
             {"name": "Open-Meteo Forecast", "use": "Rain, heat and wind for the next 5 days", "key": False},
             {"name": "Open-Meteo Flood (GloFAS)", "use": "River discharge vs its 90-day normal", "key": False},
@@ -57,5 +64,6 @@ def sources(admin: User = Depends(require_admin)):
             {"name": "OpenStreetMap Overpass", "use": "Hospitals, roads, bridges, power, water, waterways", "key": False},
             {"name": "NASA GIBS", "use": "Daily satellite imagery layer on the map", "key": False},
             {"name": "OSRM public server", "use": "Driving routes for Safe Route", "key": False},
+            {"name": "OpenStreetMap Nominatim", "use": "Address of a citizen report's map pin", "key": False},
         ],
     }

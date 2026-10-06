@@ -56,6 +56,22 @@ On a calm-weather day most assets will correctly show low risk. Sign in as the a
 **Scenarios** to apply a stress test (cloudburst, river flood, heatwave, cyclone) to see the cascade
 simulator and action plan at work.
 
+## Citizen reports with photos
+
+A normal user opens **Report an Issue**, clicks the map, picks the damage type and severity, and attaches
+1 to 3 photos. An administrator reviews them under **Reports**.
+
+Every report gets the basic checks (re-used photo, photo taken far away or long ago). To add the AI photo
+check, create `backend/.env` containing one line with your own key, then restart the backend:
+
+```
+VISION_API_KEY=paste-your-key-here
+```
+
+The provider is recognised from the key: `xai-…` is Grok (xAI), `gsk_…` is Groq, `AIza…` is Gemini.
+Settings shows which one is active. With a key set, report photos are sent to that provider.
+(If only `GEMINI_API_KEY` is set, the photo check uses Gemini too.)
+
 ## Optional
 
 - `GEMINI_API_KEY` in `backend/.env` makes the brief AI-written (free tier). Without it a built-in template is used.
@@ -66,4 +82,5 @@ simulator and action plan at work.
 - Set a strong `JWT_SECRET`.
 - Change the demo passwords and set `DEMO_MODE=false` so they are not shown on the login page.
 - Point `DATABASE_URL` at a hosted Postgres (for example Neon's free tier) instead of the local SQLite file.
+- Store report photos in object storage; `backend/uploads` is a local folder that free hosts may wipe.
 - Set the frontend's `API_URL` to the deployed backend, and serve the WebSocket over `wss://`.

@@ -2,8 +2,12 @@
 backend/.venv/
 backend/.env
 backend/hackyard.db
+backend/uploads/
 __pycache__/
 *.pyc
 
 # Node (frontend has its own .gitignore for node_modules and .next)
 node_modules/
+
+# Claude desktop app session folders
+.claude/

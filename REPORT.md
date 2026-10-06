@@ -45,7 +45,8 @@ All were rebuilt on live data.
 | Stress tests | Cloudburst, river flood, heatwave and cyclone presets applied to the real city |
 | Budget-constrained action plan | Ranks preventive actions by risk removed per rupee within a budget and crew limit |
 | Safe route | Driving route to the nearest hospital that is not at risk, warning about at-risk roads and bridges |
-| Citizen reports | Users report issues on a map; an admin verifies them; verified reports raise nearby scores |
+| Citizen reports with photos | Users mark the spot, choose the damage type and severity, and attach 1 to 3 photos; the address fills in from the pin. An admin verifies; verified reports raise nearby scores, more so when severe |
+| Automatic photo screening | Every report is checked for re-used photos and for photo time or location that contradicts the report. With an AI key (Grok, Groq or Gemini) the photos are also judged for relevance and labelled likely genuine, needs review or likely irrelevant. The admin always makes the final decision |
 | Alerts | Admin sends advisories, warnings and emergencies; users receive them instantly |
 | Situation brief | Plain-language summary for officials, and a public advisory for users; saves as PDF |
 | Satellite layer | Daily NASA imagery on the map, with a date picker for before/after comparison |
@@ -65,7 +66,8 @@ just hidden in the interface.
 | Cascade simulator, scenarios, action plan | Yes | No |
 | Brief | Full situation brief with actions | Public advisory |
 | Alerts | Create and delete | Read |
-| Citizen reports | See all, verify or reject | Submit, see own |
+| Citizen reports | See all with photos, the automatic check result and warning flags; verify, reject or re-check | Submit with photos; see own reports, photos and the final decision (never the AI verdict) |
+| Report photos | Can open any | Can open only their own |
 | Safe route | Yes | Yes |
 | Users, settings, audit log, refresh forecast | Yes | No |
 
@@ -109,6 +111,8 @@ placeholders; all motion switches off when the device asks for reduced motion.
 | Risk engine | Plain Python, NetworkX for the dependency graph | Scoring, cascade, action plan |
 | Scheduler | A background asyncio task inside FastAPI | Refreshes each city's forecast every 15 minutes |
 | Brief | Google Gemini free tier if a key is set; otherwise a built-in template | AI Brief / Advisory |
+| Photo handling | Pillow on the server; canvas and exifr in the browser | Shrinks photos, strips hidden data, detects duplicates |
+| Photo check | Any OpenAI-style vision API: Grok (xAI), Groq or Gemini, chosen by the key you paste; optional | Screening citizen report photos |
 
 ### How the pieces connect
 
@@ -138,6 +142,8 @@ Browser ──HTTP──> Next.js (3000) ──/api/* proxied──> FastAPI (80
 | `services/plan.py` | Action catalogue and the budget and crew prioritiser |
 | `services/routing.py` | Safe route to a hospital |
 | `services/brief.py` | Situation brief and public advisory |
+| `services/photos.py` | Photo validation and storage, duplicate and metadata checks, running the check after upload |
+| `services/vision.py` | AI photo check: provider selection, request, strict parsing of the answer, label rules |
 | `routers/city.py`, `community.py`, `admin.py` | API endpoints for risk, alerts and reports, users and audit |
 
 ### Free data sources (no API key for any of them)
@@ -152,6 +158,7 @@ Browser ──HTTP──> Next.js (3000) ──/api/* proxied──> FastAPI (80
 | Basemap | OpenFreeMap |
 | Satellite imagery | NASA GIBS (MODIS Terra true colour, daily) |
 | Driving routes | OSRM public server |
+| Address of a report's map pin | OpenStreetMap Nominatim |
 
 ## 7. How the risk score works
 
@@ -180,7 +187,38 @@ these links (for example a substation failure stops a water facility, which degr
 cost and crew need. Actions are ranked by benefit per rupee, where benefit is risk removed × criticality ×
 number of dependent assets, then selected until the budget or crews run out.
 
-## 8. Verified on localhost
+## 8. How citizen reports are screened
+
+1. **In the browser:** each photo's time and GPS position are read, then the photo is redrawn at a smaller
+   size. Redrawing keeps only the pixels, so the upload is small and carries no hidden data.
+2. **On upload:** the server accepts 1 to 3 real JPEG, PNG or WebP files under 5 MB each, re-encodes them,
+   and stores them under random names in a private folder. Photos are served only to administrators and to
+   the person who sent the report. Each user may send 10 reports a day.
+3. **Basic checks (always on, no AI):**
+   - *Duplicate:* the same photo, or a resized or recompressed copy, already attached to another report.
+   - *Far from pin:* the photo was taken more than 1 km from the reported spot.
+   - *Old photo:* the photo was taken more than 7 days before the report.
+4. **AI check (optional):** after the upload is answered, the photos and the claimed damage type go to the
+   configured vision model, which returns a structured answer: is public infrastructure visible, is damage
+   visible, does it match the claim, severity estimate, is it inappropriate, confidence and a one-line reason.
+5. **Label for the administrator:**
+
+| Label | When |
+|---|---|
+| Likely genuine | Damage is visible, matches the claim, confidence at least 60%, and the photo is not a duplicate |
+| Needs review | Damage is visible but does not match the claim, confidence is low, or the photo is a duplicate |
+| Likely irrelevant | No public infrastructure or no damage is visible |
+| Inappropriate content | Photos stay blurred until the administrator chooses to look |
+| Not AI-checked | No key is set, or the AI service failed; the basic checks still apply |
+
+The AI never verifies or rejects a report. The citizen never sees the AI verdict, only the administrator's
+decision. Text inside a photo is treated as part of the scene, and the model's answer is coerced field by
+field into the expected types, so a photo cannot instruct the system. A verified report adds 4, 8 or 12
+points (minor, serious, dangerous) to assets within 400 m, capped at 20.
+
+**Privacy:** with an AI key set, report photos are sent to that provider; the report form says so.
+
+## 9. Verified on localhost
 
 Tested against live data for Pune and Kochi:
 
@@ -194,10 +232,35 @@ Tested against live data for Pune and Kochi:
 - A verified citizen report raised the score of the two assets within 400 m.
 - Safe route returns a hospital, distance and time from a clicked point.
 
-Not tested: the Gemini-written brief (no key was configured; the template path was used) and the
-"Use my location" buttons (they need browser location permission).
+Photo reports (63 automated checks plus a run through the form in the browser):
 
-## 9. Known limits
+- Uploads: a text file renamed `.jpg`, a GIF, an oversized file, four photos and no photos are all refused,
+  and nothing is stored when a report is refused.
+- Stored photos carry no metadata and are shrunk to 1600 px.
+- Access: the owner and administrators can open a photo; another user gets "not found"; signed-out gets 401.
+- Basic checks: an identical photo and a resized, recompressed copy sent by a different user are both
+  flagged as duplicates; far-away and old photo metadata are flagged; malformed metadata is ignored.
+- The daily limit, the review queue order, verify and re-check permissions, and the severity-weighted score
+  effect (12 points, then capped at 20).
+- AI path, against a local stand-in server that imitates the provider's API: each label, a duplicate being
+  downgraded to needs review, several photos in one request, an unreadable answer, a rejected key, a model
+  that cannot read images, and the service being down.
+- In the browser: the form (pin, address auto-fill, severity, photo preview, send) and the administrator's
+  queue (labels, flags, photo viewer, blurred inappropriate photos, verify).
+
+Not tested: **a real Grok, Groq or Gemini key.** The AI path was exercised only against the stand-in server,
+so the model names preset for each provider and the quality of real judgements are unconfirmed. Also not
+tested: the Gemini-written brief and the "Use my location" buttons (they need browser location permission).
+
+## 10. Known limits
+
+- **Photo screening is advice, not proof.** Photo metadata can be edited or missing (messaging apps strip
+  it), AI models misjudge dark or blurry photos, and neither can tell a staged or AI-generated image
+  reliably. That is why a person always decides.
+- **Free AI tiers have usage limits** and Grok from xAI is normally paid per use. When the limit is hit,
+  reports still arrive and show "Not AI-checked".
+- **Photos are stored on the server's disk.** Free hosting often wipes local disks, so deployment needs
+  object storage.
 
 - **Dependency links are estimates** from proximity, because OpenStreetMap does not record which substation
   feeds which hospital. The interface labels them as estimated.
@@ -211,7 +274,7 @@ Not tested: the Gemini-written brief (no key was configured; the template path w
   flood detection.
 - **Safe route** checks roads against at-risk assets near the route; it does not model water depth.
 
-## 10. Changes from the first plan
+## 11. Changes from the first plan
 
 | Planned | Built | Why |
 |---|---|---|
@@ -222,7 +285,7 @@ Not tested: the Gemini-written brief (no key was configured; the template path w
 | MapLibre GL 6 | MapLibre GL 5 | Version 6's worker did not load under Next.js's bundler |
 | SQLAlchemy latest | SQLAlchemy 2.0.x | Windows App Control blocked the newer version's compiled file on this machine |
 
-## 11. Presentation slides
+## 12. Presentation slides
 
 1. **Title:** Hack_Yard demo, team, one-line pitch
 2. **Problem:** cities know where assets are, not which will fail
@@ -232,13 +295,15 @@ Not tested: the Gemini-written brief (no key was configured; the template path w
 6. **Dashboard and live map:** any city, explainable scores, 72-hour outlook
 7. **Cascade simulator:** fail a bridge or substation, watch hospitals lose access or power
 8. **Stress tests and action plan:** cloudburst scenario, budget-limited priorities
-9. **Citizen side:** alerts, safe route, report an issue, public advisory
+9. **Citizen side:** alerts, safe route, public advisory, and photo reports: citizen uploads, AI screens,
+   admin verifies, nearby risk scores update live
 10. **Architecture and free data sources** (diagram from section 6)
 11. **What is unique and the impact:** asset-level, preventive, explainable, zero cost
 12. **Limits, roadmap and deployment plan**
 
-## 12. Next steps
+## 13. Next steps
 
+- Admin bulk import (CSV or Excel) for real dependency links, asset attributes and past incidents.
 - Calibrate the risk weights against recorded flood and outage events.
 - Replace inferred dependency links with utility data where a city can supply it.
 - Add Sentinel-1 radar flood-extent detection for true before/after flood mapping.

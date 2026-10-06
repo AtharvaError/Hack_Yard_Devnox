@@ -1,64 +1,48 @@
 "use client";
 
-import { Check, LocateFixed, Send, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RiskMap, type MapPoint } from "@/components/RiskMap";
+import { Lightbox, ReportCard, STATUS_COLOR } from "@/components/ReportCard";
+import { ReportForm } from "@/components/ReportForm";
 import { Card, Empty, ErrorNote, PageTitle, Skeleton } from "@/components/ui";
-import { api, type Report } from "@/lib/api";
-import { capitalize, timeAgo } from "@/lib/labels";
+import { api, type Report, type ReportOptions } from "@/lib/api";
+import { capitalize } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
-const STATUS_COLOR = { pending: "#fbbf24", verified: "#34d399", rejected: "#8b8fa8" };
+type Filter = "pending" | "verified" | "rejected" | "all";
+const FILTERS: Filter[] = ["pending", "verified", "rejected", "all"];
 
 export default function ReportsPage() {
   const { city, isAdmin, notify } = useApp();
   const { data, error, reload } = useApi<Report[]>(city ? `/api/reports?city_id=${city.id}` : null);
-  const categories = useApi<string[]>("/api/report-categories");
-  const [category, setCategory] = useState("Flooded road");
-  const [description, setDescription] = useState("");
+  const options = useApi<ReportOptions>("/api/report-options");
   const [pin, setPin] = useState<[number, number] | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState<Filter>(isAdmin ? "pending" : "all");
+  const [selected, setSelected] = useState<number | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
 
   const center = useMemo<[number, number]>(() => [city!.lon, city!.lat], [city]);
+  const shown = useMemo(() => (data ?? []).filter((r) => filter === "all" || r.status === filter), [data, filter]);
   const points = useMemo<MapPoint[]>(
     () =>
-      (data ?? []).map((r) => ({
+      shown.map((r) => ({
         id: r.id,
-        name: r.category,
+        name: `#${r.id} ${r.category}`,
         lat: r.lat,
         lon: r.lon,
         color: STATUS_COLOR[r.status],
-        label: `${capitalize(r.status)} · ${r.description.slice(0, 60)}`,
+        label: `${capitalize(r.severity)} · ${capitalize(r.status)}`,
+        ring: r.id === selected,
       })),
-    [data],
+    [shown, selected],
   );
 
-  const locate = () => {
-    if (!navigator.geolocation) return notify("Your browser does not share location. Click the map instead.", "error");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setPin([pos.coords.longitude, pos.coords.latitude]),
-      () => notify("Could not get your location. Click the map instead.", "error"),
-    );
-  };
+  // Clicking a point on the map brings its card into view.
+  useEffect(() => {
+    if (selected) document.getElementById(`report-${selected}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selected]);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pin) return notify("Click the map to mark where the problem is.", "error");
-    setBusy(true);
-    try {
-      await api("/api/reports", { body: { city_id: city!.id, category, description, lat: pin[1], lon: pin[0] } });
-      setDescription("");
-      setPin(null);
-      notify("Report submitted. An administrator will review it.");
-      reload();
-    } catch (err) {
-      notify((err as Error).message, "error");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const review = async (report: Report, status: Report["status"]) => {
+  const review = async (report: Report, status: "verified" | "rejected") => {
     try {
       await api(`/api/reports/${report.id}`, { method: "PATCH", body: { status } });
       reload();
@@ -67,22 +51,34 @@ export default function ReportsPage() {
     }
   };
 
+  const recheck = async (report: Report) => {
+    try {
+      await api(`/api/reports/${report.id}/recheck`, { method: "POST" });
+      reload();
+    } catch (err) {
+      notify((err as Error).message, "error");
+    }
+  };
+
+  const count = (f: Filter) => (data ?? []).filter((r) => f === "all" || r.status === f).length;
+
   return (
     <div>
       <PageTitle
         title={isAdmin ? "Citizen Reports" : "Report an Issue"}
         subtitle={
           isAdmin
-            ? "Verify reports from the public. A verified report raises the risk score of assets within 400 m."
-            : "Tell the city about flooding, damage or outages you can see. Click the map to mark the spot."
+            ? "Each report's photos are screened automatically; you make the final call. A verified report raises the risk score of assets within 400 m."
+            : "Tell the city about damage you can see. Click the map to mark the spot, add a photo and send."
         }
       />
-      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
-        <div className="card p-2">
+      <div className="grid gap-5 xl:grid-cols-[1fr_400px]">
+        <div className="card self-start p-2 xl:sticky xl:top-0">
           <RiskMap
             center={center}
             points={points}
             pin={pin}
+            onSelect={setSelected}
             onMapClick={isAdmin ? undefined : (lat, lon) => setPin([lon, lat])}
             className="h-[calc(100vh-230px)] min-h-[420px]"
           />
@@ -91,64 +87,57 @@ export default function ReportsPage() {
         <div className="space-y-5">
           {!isAdmin && (
             <Card title="New report">
-              <form onSubmit={submit} className="space-y-3">
-                <label className="block text-sm">
-                  <span className="mb-1.5 block text-muted">What is the problem?</span>
-                  <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
-                    {(categories.data ?? [category]).map((c) => <option key={c}>{c}</option>)}
-                  </select>
-                </label>
-                <label className="block text-sm">
-                  <span className="mb-1.5 block text-muted">Describe what you see</span>
-                  <textarea className="input min-h-24" value={description} onChange={(e) => setDescription(e.target.value)} required minLength={5} />
-                </label>
-                <div className="flex items-center justify-between gap-2 text-xs text-muted">
-                  <span>{pin ? `Location set: ${pin[1].toFixed(4)}, ${pin[0].toFixed(4)}` : "No location yet. Click the map."}</span>
-                  <button type="button" onClick={locate} className="flex shrink-0 items-center gap-1 text-accent hover:underline">
-                    <LocateFixed size={13} /> Use my location
-                  </button>
-                </div>
-                <button className="btn w-full" disabled={busy}>
-                  <Send size={15} /> Submit report
-                </button>
-              </form>
+              {options.error && <ErrorNote message={options.error} onRetry={options.reload} />}
+              {!options.data && !options.error && <Skeleton className="h-80" />}
+              {options.data && <ReportForm options={options.data} pin={pin} onPin={setPin} onSubmitted={reload} />}
             </Card>
           )}
 
-          <Card title={isAdmin ? "All reports" : "My reports"}>
+          <Card title={isAdmin ? "Review queue" : "My reports"}>
+            {isAdmin && (
+              <div className="mb-4 flex rounded-xl border border-line bg-panel-2 p-0.5 text-xs" role="group" aria-label="Filter reports">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    aria-pressed={filter === f}
+                    className={`flex-1 rounded-lg py-1.5 font-medium transition-colors ${
+                      filter === f ? "bg-accent text-white" : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    {capitalize(f)} {count(f)}
+                  </button>
+                ))}
+              </div>
+            )}
             {error && <ErrorNote message={error} onRetry={reload} />}
             {!data && !error && <Skeleton className="h-32" />}
-            {data?.length === 0 && <Empty>{isAdmin ? "No reports have been submitted yet." : "You have not submitted any reports."}</Empty>}
-            <ul className="max-h-[50vh] space-y-3 overflow-auto pr-1">
-              {data?.map((r) => (
-                <li key={r.id} className="rounded-xl bg-panel-2 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">{r.category}</span>
-                    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color: STATUS_COLOR[r.status], background: `${STATUS_COLOR[r.status]}22` }}>
-                      {capitalize(r.status)}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted">{r.description}</p>
-                  <p className="mt-1.5 text-xs text-muted">
-                    {isAdmin ? `${r.user_email} · ` : ""}
-                    {timeAgo(r.created_at)}
-                  </p>
-                  {isAdmin && r.status === "pending" && (
-                    <div className="mt-3 flex gap-2">
-                      <button className="btn flex-1 !py-1.5" onClick={() => review(r, "verified")}>
-                        <Check size={14} /> Verify
-                      </button>
-                      <button className="btn btn-ghost flex-1 !py-1.5" onClick={() => review(r, "rejected")}>
-                        <X size={14} /> Reject
-                      </button>
-                    </div>
-                  )}
-                </li>
+            {data && shown.length === 0 && (
+              <Empty>
+                {!isAdmin
+                  ? "You have not sent any reports yet."
+                  : filter === "pending"
+                    ? "Nothing is waiting for review."
+                    : `No ${filter === "all" ? "" : filter + " "}reports for ${city!.name}.`}
+              </Empty>
+            )}
+            <ul className="space-y-3">
+              {shown.map((r) => (
+                <ReportCard
+                  key={r.id}
+                  report={r}
+                  selected={r.id === selected}
+                  onSelect={() => setSelected(r.id)}
+                  onOpenPhoto={setPhoto}
+                  onReview={isAdmin ? (status) => review(r, status) : undefined}
+                  onRecheck={isAdmin ? () => recheck(r) : undefined}
+                />
               ))}
             </ul>
           </Card>
         </div>
       </div>
+      {photo && <Lightbox src={photo} onClose={() => setPhoto(null)} />}
     </div>
   );
 }

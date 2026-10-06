@@ -97,6 +97,28 @@ class Report(Base):
     lon: Mapped[float] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # pending | verified | rejected
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    address: Mapped[str] = mapped_column(String(300), default="")
+    severity: Mapped[str] = mapped_column(String(20), default="serious")  # minor | serious | dangerous
+    # Automatic photo check. It only advises the administrator; `status` is always a human decision.
+    # pending | genuine | review | irrelevant | inappropriate | unchecked
+    check_label: Mapped[str] = mapped_column(String(20), default="unchecked")
+    check_reason: Mapped[str] = mapped_column(String(300), default="")
+    check_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    check_source: Mapped[str] = mapped_column(String(80), default="")
+    flags: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class ReportPhoto(Base):
+    __tablename__ = "report_photos"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"), index=True)
+    file_name: Mapped[str] = mapped_column(String(80))
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    dhash: Mapped[str] = mapped_column(String(16), default="")  # perceptual hash, for near-duplicates
+    # Read from the photo's metadata in the browser before it is stripped. A signal, not proof.
+    taken_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
+    exif_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    exif_lon: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class AuditLog(Base):
