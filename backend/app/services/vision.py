@@ -25,11 +25,8 @@ PROVIDERS = {
         "name": "Groq",
         "base": "https://api.groq.com/openai/v1",
         "key_prefix": "gsk_",
-        "models": [
-            "meta-llama/llama-4-scout-17b-16e-instruct",
-            "meta-llama/llama-4-maverick-17b-128e-instruct",
-        ],
-        "hints": ("vision", "scout", "maverick", "llava"),
+        "models": ["qwen/qwen3.8-27b", "meta-llama/llama-4-scout-17b-16e-instruct"],
+        "hints": ("vision", "qwen", "scout", "maverick", "llava", "-vl"),
     },
     "gemini": {
         "name": "Gemini",
@@ -59,7 +56,9 @@ Judge the photos together and reply with exactly this JSON:
   "reason": "one short sentence saying what the photos show"
 }}"""
 
-MAX_MODEL_ATTEMPTS = 6
+MAX_MODEL_ATTEMPTS = 8
+# Listed models that are certainly not chat models (speech, moderation, embeddings); never worth trying.
+NOT_CHAT = ("whisper", "tts", "orpheus", "speech", "guard", "embed", "rerank")
 _working_model: dict[str, str] = {}  # provider -> model that last answered
 
 
@@ -93,17 +92,25 @@ def describe() -> dict:
 
 
 def _candidates(cfg: dict) -> list[str]:
-    """Models to try, best guess first. Model names change often, so also ask the provider what it has."""
-    models = list(cfg["models"])
+    """Models to try, best guess first.
+
+    Providers retire and rename models often, so the preset names are only a starting point: the
+    provider is also asked what this key can use. A text-only model refuses an image at once, so
+    trying a few is cheap, and the one that answers is remembered until the backend restarts.
+    """
     if cfg["provider"] in _working_model:
-        models.insert(0, _working_model[cfg["provider"]])
+        return [_working_model[cfg["provider"]]]
+    models = list(cfg["models"])
     if not config.VISION_MODEL:
         try:
             res = httpx.get(f"{cfg['base']}/models", headers={"Authorization": f"Bearer {cfg['key']}"}, timeout=15)
             listed = [m.get("id", "") for m in res.json().get("data", [])] if res.status_code == 200 else []
-            models += [m for m in listed if any(hint in m.lower() for hint in cfg["hints"])]
         except (httpx.HTTPError, ValueError):
-            pass
+            listed = []
+        if listed:
+            chat = [m for m in listed if not any(word in m.lower() for word in NOT_CHAT)]
+            likely = [m for m in chat if any(hint in m.lower() for hint in cfg["hints"])]
+            models += likely + chat  # likely vision models before the rest
     unique = list(dict.fromkeys(m for m in models if m))
     return unique[:MAX_MODEL_ATTEMPTS]
 
@@ -172,6 +179,7 @@ def check(cfg: dict, images: list[bytes], damage_type: str, severity: str) -> di
         if res.status_code != 200:
             # Usually "unknown model" or "this model cannot read images": try the next one.
             last_error = f"model {model} was refused (HTTP {res.status_code})"
+            _working_model.pop(cfg["provider"], None)  # if it used to work, look again next time
             continue
         try:
             verdict = _parse(res.json())
