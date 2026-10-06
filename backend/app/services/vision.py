@@ -47,6 +47,7 @@ USER_PROMPT = """The citizen says these photos show: "{damage_type}" (their seve
 
 Judge the photos together and reply with exactly this JSON:
 {{
+  "real_photo": true or false,             // taken with a camera at a real place; false for a drawing, cartoon, diagram, screenshot, map or computer-generated image
   "shows_infrastructure": true or false,   // a road, bridge, power line, building, drain, pipe or similar public asset is visible
   "shows_damage": true or false,           // damage, flooding, blockage or a hazard is visible
   "matches_claim": true or false,          // what is visible fits the damage type the citizen chose
@@ -123,6 +124,8 @@ def _clean(raw: dict) -> dict:
     except (TypeError, ValueError):
         confidence = 0.0
     return {
+        # Only an explicit "false" counts, so a model that leaves the field out is not penalised.
+        "real_photo": raw.get("real_photo") is not False,
         "shows_infrastructure": raw.get("shows_infrastructure") is True,
         "shows_damage": raw.get("shows_damage") is True,
         "matches_claim": raw.get("matches_claim") is True,
@@ -200,6 +203,8 @@ def decide(verdict: dict, flags: list[dict]) -> tuple[str, str]:
         return "inappropriate", "The photos appear to contain inappropriate content."
     if not verdict["shows_infrastructure"] or not verdict["shows_damage"]:
         return "irrelevant", reason
+    if not verdict["real_photo"]:
+        return "review", f"{reason} This does not look like a real camera photo."
     duplicate = any(flag["code"] == "duplicate" for flag in flags)
     if verdict["matches_claim"] and verdict["confidence"] >= 0.6 and not duplicate:
         return "genuine", reason
