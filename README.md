@@ -34,6 +34,15 @@ npm run dev
 
 Open <http://localhost:3000>. The first screen is the login page.
 
+**If ports 8000 or 3000 are already used by another project,** pick two free ones:
+
+```powershell
+.\start.ps1 -ApiPort 8100 -WebPort 3100
+```
+
+Then open <http://localhost:3100>. By hand, the equivalent is `--port 8100` for the backend, and for the
+frontend `$env:NEXT_PUBLIC_API_PORT = '8100'` followed by `npm run dev -- --port 3100`.
+
 ## Demo accounts
 
 Two accounts are created on first run and shown as one-click buttons on the login page:

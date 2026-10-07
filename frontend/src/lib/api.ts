@@ -23,7 +23,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
       if (typeof data.detail === "string") message = data.detail;
       else if (Array.isArray(data.detail)) message = data.detail.map((d: { msg: string }) => d.msg).join(", ");
     } catch {
-      if (res.status >= 500) message = "The server is not reachable. Is the backend running on port 8000?";
+      if (res.status >= 500) message = "The server is not reachable. Is the backend running?";
     }
     throw new ApiError(res.status, message);
   }

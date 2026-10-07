@@ -68,7 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="card max-w-md p-8 text-center">
           <h1 className="text-lg font-semibold">Cannot reach the server</h1>
           <p className="mt-2 text-sm text-muted">
-            The backend on port 8000 is not responding. Start it, then try again.
+            The backend is not responding. Start it, then try again.
           </p>
           <button className="btn mt-5" onClick={() => window.location.reload()}>
             Try again

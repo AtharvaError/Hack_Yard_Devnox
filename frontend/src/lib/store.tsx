@@ -27,6 +27,10 @@ type AppState = {
   notify: (text: string, tone?: Toast["tone"]) => void;
 };
 
+// The live channel connects straight to the backend, so it needs the backend's port.
+// Set NEXT_PUBLIC_API_PORT when the backend is not on 8000 (for example when 8000 is taken).
+const API_PORT = process.env.NEXT_PUBLIC_API_PORT ?? "8000";
+
 const AppContext = createContext<AppState | null>(null);
 const CITY_KEY = "hackyard.city";
 
@@ -97,7 +101,7 @@ export function AppProvider({ user, children }: { user: User; children: React.Re
     let retry: ReturnType<typeof setTimeout>;
     let closed = false;
     const connect = () => {
-      socket = new WebSocket(`ws://${window.location.hostname}:8000/ws/live`);
+      socket = new WebSocket(`ws://${window.location.hostname}:${API_PORT}/ws/live`);
       socket.onopen = () => setLive(true);
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data);

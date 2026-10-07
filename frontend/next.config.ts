@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
+// Where the backend is. NEXT_PUBLIC_API_PORT moves a local backend off port 8000 (it also tells the
+// browser where the live channel is); API_URL points at a backend on another machine.
+const API_PORT = process.env.NEXT_PUBLIC_API_PORT ?? "8000";
+const API_URL = process.env.API_URL ?? `http://127.0.0.1:${API_PORT}`;
 
 const nextConfig: NextConfig = {
   // The dev badge sits in the bottom-left corner, on top of the sidebar's Log out button.
