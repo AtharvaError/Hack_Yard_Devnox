@@ -1,0 +1,22 @@
+# Render blueprint for the backend (FastAPI). The frontend goes on Vercel; see "Deploying" in README.md.
+# The free plan has no permanent disk: the SQLite database and report photos reset whenever the service
+# restarts. Pune and Kochi are recreated from backend/demo_data on every start.
+services:
+  - type: web
+    name: infrasentinel-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      # Optional key for the AI photo check. Enter it in the Render dashboard, never in this file.
+      - key: VISION_API_KEY
+        sync: false

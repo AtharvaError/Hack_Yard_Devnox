@@ -98,10 +98,41 @@ Settings shows which one is active. With a key set, report photos are sent to th
 - `GEMINI_API_KEY` in `backend/.env` makes the brief AI-written (free tier). Without it a built-in template is used.
 - `CITY_RADIUS_KM` (default 7, maximum 15) sets how far around the city centre is analysed.
 
-## Before deploying
+## Deploying
 
-- Set a strong `JWT_SECRET`.
+The app is two programs, so it needs two hosts. Both have a free plan.
+
+| Part | Host | Why |
+|---|---|---|
+| Frontend (`frontend`) | Vercel | Built for Next.js |
+| Backend (`backend`) | Render | Needs a long-running server for the live channel and the 15-minute refresh, which Vercel does not provide |
+
+**1. Backend on Render**
+
+- New > Blueprint, pick this repository. `render.yaml` sets everything up and generates a `JWT_SECRET`.
+- Optional: enter `VISION_API_KEY` in the Render dashboard for the AI photo check.
+- Note the service address, for example `https://infrasentinel-api.onrender.com`.
+
+**2. Frontend on Vercel**
+
+- Import this repository and set **Root Directory** to `frontend`.
+- Add two environment variables, using your Render address:
+  - `API_URL` = `https://infrasentinel-api.onrender.com`
+  - `NEXT_PUBLIC_WS_URL` = `wss://infrasentinel-api.onrender.com/ws/live`
+- Deploy. The browser only talks to the Vercel address; `/api` is forwarded to Render.
+
+**What to expect on the free plans**
+
+- Render's free service sleeps when idle, so the first request after a pause takes about a minute.
+- Render's free plan has no permanent disk. Accounts people create, cities they load and report photos
+  are lost whenever the service restarts. The demo accounts and the Pune and Kochi demo cities come back
+  on every start.
+- Loading a brand-new city can take longer than the hosted request limit and fail. Pune and Kochi are
+  instant.
+
+**For anything beyond a demo**
+
 - Change the demo passwords and set `DEMO_MODE=false` so they are not shown on the login page.
-- Point `DATABASE_URL` at a hosted Postgres (for example Neon's free tier) instead of the local SQLite file.
-- Store report photos in object storage; `backend/uploads` is a local folder that free hosts may wipe.
-- Set the frontend's `API_URL` to the deployed backend, and serve the WebSocket over `wss://`.
+- Point `DATABASE_URL` at a hosted Postgres (for example Neon's free tier) and add `psycopg[binary]` to
+  `backend/requirements.txt`.
+- Store report photos in object storage instead of `backend/uploads`.

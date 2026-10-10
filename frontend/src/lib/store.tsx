@@ -102,7 +102,8 @@ export function AppProvider({ user, children }: { user: User; children: React.Re
     let retry: ReturnType<typeof setTimeout>;
     let closed = false;
     const connect = () => {
-      socket = new WebSocket(`ws://${window.location.hostname}:${API_PORT}/ws/live`);
+      // Hosted: NEXT_PUBLIC_WS_URL points at the backend (wss://…/ws/live). Local: same machine, backend port.
+      socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || `ws://${window.location.hostname}:${API_PORT}/ws/live`);
       socket.onopen = () => setLive(true);
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data);

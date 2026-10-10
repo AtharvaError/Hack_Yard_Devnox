@@ -32,6 +32,7 @@ def _set_cookie(response: Response, user: User) -> None:
         create_token(user),
         httponly=True,
         samesite="lax",
+        secure=config.COOKIE_SECURE,
         max_age=config.JWT_HOURS * 3600,
         path="/",
     )

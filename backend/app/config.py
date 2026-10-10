@@ -21,6 +21,8 @@ _load_env_file()
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-only-secret-change-me")
 JWT_HOURS = 12
 COOKIE_NAME = "hy_session"
+# Set to true when the site is served over https, so the session cookie is never sent over plain http.
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
 
 DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
 DEMO_ADMIN_EMAIL = os.getenv("DEMO_ADMIN_EMAIL", "admin@hackyard.demo")
