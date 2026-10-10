@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from .. import config
 from ..models import Asset, City, Dependency, utcnow
+from . import demo
 from .geo import fast_dist_m, offset
 
 OVERPASS_MIRRORS = [
@@ -249,7 +250,8 @@ def fetch_weather(lat: float, lon: float) -> tuple[dict, dict]:
 
 
 def refresh_weather(db: Session, city: City) -> None:
-    city.weather, city.flood = fetch_weather(city.lat, city.lon)
+    storm = demo.storm_for(city) if city.data_mode == "demo" else None
+    city.weather, city.flood = demo.storm_weather(storm) if storm else fetch_weather(city.lat, city.lon)
     city.weather_at = utcnow()
     db.commit()
 

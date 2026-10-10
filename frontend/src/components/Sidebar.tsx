@@ -137,10 +137,14 @@ export function Sidebar() {
       <div className="mb-2 rounded-xl border border-accent/30 bg-accent/10 p-3 text-xs [@media(max-height:760px)]:hidden">
         <div className="flex items-center gap-2 font-medium">
           <span className={`live-dot ${live ? "" : "off"}`} />
-          {live ? "Live data connected" : "Reconnecting…"}
+          {!live ? "Reconnecting…" : city?.data_mode === "demo" ? "Demo data in use" : "Live data connected"}
         </div>
         <div className="mt-1.5 text-muted">
-          {city ? `Forecast updated ${timeAgo(city.weather_at)}` : "No city loaded yet"}
+          {!city
+            ? "No city loaded yet"
+            : city.data_mode === "demo"
+              ? `Modelled storm: ${city.demo_storm}`
+              : `Forecast updated ${timeAgo(city.weather_at)}`}
         </div>
       </div>
 

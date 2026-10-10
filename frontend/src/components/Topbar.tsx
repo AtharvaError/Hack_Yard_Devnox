@@ -1,9 +1,9 @@
 "use client";
 
-import { Bell, Loader2, MapPin, Search, X } from "lucide-react";
+import { Bell, FlaskConical, Loader2, MapPin, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { api, type Place } from "@/lib/api";
+import { api, type City, type Place } from "@/lib/api";
 import { HORIZONS } from "@/lib/labels";
 import { useApp } from "@/lib/store";
 
@@ -100,6 +100,54 @@ export function CitySearch({ autoFocus = false }: { autoFocus?: boolean }) {
   );
 }
 
+/** Says when scores come from the demo dataset, and lets an administrator switch to the live forecast and back. */
+function DataModePill() {
+  const { city, isAdmin, selectCity, notify } = useApp();
+  const [busy, setBusy] = useState(false);
+  if (!city?.demo_storm) return null;
+  const demo = city.data_mode === "demo";
+  if (!demo && !isAdmin) return null;
+
+  const tone = demo ? "border-moderate/50 bg-moderate/10 text-moderate" : "border-line bg-panel text-muted hover:text-ink";
+  const shape = "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium";
+  const label = demo ? "Demo data" : "Use demo data";
+  if (!isAdmin) {
+    return (
+      <span className={`${shape} ${tone}`} title={`Scores use a modelled storm (${city.demo_storm}), not today's weather.`}>
+        <FlaskConical size={13} /> {label}
+      </span>
+    );
+  }
+
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      const mode = demo ? "live" : "demo";
+      selectCity(await api<City>(`/api/cities/${city.id}/data-mode`, { body: { mode } }));
+      notify(mode === "demo" ? `Showing the demo storm: ${city.demo_storm}.` : "Showing the live forecast.");
+    } catch (err) {
+      notify((err as Error).message, "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      onClick={toggle}
+      disabled={busy}
+      className={`${shape} ${tone}`}
+      title={
+        demo
+          ? `Scores use a modelled storm (${city.demo_storm}), not today's weather. Click to switch to the live forecast.`
+          : `Scores use the live forecast. Click to show the modelled storm (${city.demo_storm}).`
+      }
+    >
+      {busy ? <Loader2 size={13} className="animate-spin" /> : <FlaskConical size={13} />} {label}
+      {demo && <X size={13} />}
+    </button>
+  );
+}
+
 export function Topbar() {
   const { user, isAdmin, city, horizon, setHorizon, scenario, setScenario, badges } = useApp();
 
@@ -124,6 +172,8 @@ export function Topbar() {
       <div className="flex flex-1 justify-center">
         <CitySearch />
       </div>
+
+      <DataModePill />
 
       {scenario && isAdmin && (
         <button

@@ -137,6 +137,7 @@ Browser ──HTTP──> Next.js (3000) ──/api/* proxied──> FastAPI (80
 | `app/main.py` | App start-up, demo account seeding, forecast refresh loop, WebSocket endpoint |
 | `app/auth.py`, `routers/auth.py` | Password hashing, tokens, login, sign-up, role guards |
 | `services/citydata.py` | Geocoding, OpenStreetMap assets, elevation and slope, forecast, inferred dependencies |
+| `services/demo.py` | Demo dataset: loads the Pune and Kochi snapshots and builds their modelled storm weather |
 | `services/risk.py` | Hazard intensity, exposure, vulnerability, asset and city scores, stress tests |
 | `services/cascade.py` | Dependency graph and knock-on failure simulation |
 | `services/plan.py` | Action catalogue and the budget and crew prioritiser |
@@ -275,6 +276,9 @@ permission).
 
 ## 10. Known limits
 
+- **Pune and Kochi open on demo data.** Their assets are real snapshots, but the storm they are scored
+  against is modelled, not today's weather. The app labels this on screen, and an administrator can
+  switch either city to the live forecast. Figures quoted from demo mode are not live measurements.
 - **Photo screening is advice, not proof.** Photo metadata can be edited or missing (messaging apps strip
   it), AI models misjudge dark or blurry photos, and neither can tell a staged or AI-generated image
   reliably. That is why a person always decides.

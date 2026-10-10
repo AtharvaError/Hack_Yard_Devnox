@@ -44,6 +44,9 @@ export type City = {
   radius_km: number;
   weather_at: string | null;
   asset_count: number | null;
+  // "demo" means scores come from the city's modelled storm, not the live forecast.
+  data_mode: "live" | "demo";
+  demo_storm: string | null; // name of the modelled storm, when the city has a demo dataset
 };
 
 export type Place = { name: string; country: string; admin1: string; lat: number; lon: number; population: number };

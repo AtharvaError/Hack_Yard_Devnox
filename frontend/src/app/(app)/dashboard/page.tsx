@@ -166,8 +166,10 @@ export default function DashboardPage() {
                 ))}
               </div>
               <p className="mt-4 text-xs text-muted">
-                {data.assets.length} assets monitored within {data.city.radius_km} km of the centre. Forecast updated{" "}
-                {timeAgo(data.city.weather_at)}.
+                {data.assets.length} assets monitored within {data.city.radius_km} km of the centre.{" "}
+                {data.city.data_mode === "demo"
+                  ? `Demo data: scored against a modelled storm (${data.city.demo_storm}), not today's weather.`
+                  : `Forecast updated ${timeAgo(data.city.weather_at)}.`}
               </p>
             </Card>
           </>

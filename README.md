@@ -55,6 +55,18 @@ Two accounts are created on first run and shown as one-click buttons on the logi
 They are defined in [backend/app/config.py](backend/app/config.py) and can be overridden in `backend/.env`
 (see [backend/.env.example](backend/.env.example)). Anyone else can sign up and becomes a normal user.
 
+## Demo dataset (Pune and Kochi)
+
+Pune and Kochi are ready the moment the app starts, with no outside service needed. `backend/demo_data`
+holds a snapshot of each city's real OpenStreetMap assets and a **modelled storm day**. These two cities
+open in demo mode, so the dashboard, map, cascade simulator and action plan always have risk to show.
+
+- The storm weather is made up for demonstration; the assets, terrain and links are real snapshots.
+- A yellow **Demo data** label in the top bar shows when a city is in demo mode.
+- An administrator can click that label to switch the city to the live forecast, and click
+  **Use demo data** to switch back.
+- Every other city uses the live forecast only.
+
 ## First use
 
 After signing in, type any city into the search box. A new city takes roughly 20 to 60 seconds to build

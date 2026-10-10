@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Literal
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,7 +13,7 @@ from ..live import hub
 from ..models import Asset, City, Dependency, Report, User, utcnow
 from ..services import brief as brief_service
 from ..services import cascade as cascade_service
-from ..services import citydata, routing
+from ..services import citydata, demo, routing
 from ..services import plan as plan_service
 from ..services import risk
 
@@ -31,6 +32,10 @@ class LoadCity(BaseModel):
     population: int = 0
 
 
+class DataMode(BaseModel):
+    mode: Literal["live", "demo"]
+
+
 class CascadeRequest(BaseModel):
     failed_ids: list[int] = []
     auto: bool = False  # fail every asset currently at critical risk
@@ -39,6 +44,7 @@ class CascadeRequest(BaseModel):
 
 
 def _city_public(city: City, asset_count: int | None = None) -> dict:
+    storm = demo.storm_for(city)
     return {
         "id": city.id,
         "name": city.name,
@@ -50,6 +56,8 @@ def _city_public(city: City, asset_count: int | None = None) -> dict:
         "radius_km": city.radius_km,
         "weather_at": city.weather_at.isoformat() if city.weather_at else None,
         "asset_count": asset_count,
+        "data_mode": "demo" if storm and city.data_mode == "demo" else "live",
+        "demo_storm": storm["label"] if storm else None,
     }
 
 
@@ -185,6 +193,24 @@ def refresh(city_id: int, user: User = Depends(require_admin), db: Session = Dep
     except httpx.HTTPError:
         raise HTTPException(502, "The weather service is not responding. Try again shortly.")
     audit(db, user.email, "refresh_weather", city.name)
+    hub.broadcast_from_thread({"type": "risk_updated", "city_id": city.id})
+    return _city_public(city)
+
+
+@router.post("/cities/{city_id}/data-mode")
+def set_data_mode(city_id: int, body: DataMode, user: User = Depends(require_admin), db: Session = Depends(get_db)):
+    city = _get_city(db, city_id)
+    if body.mode == "demo" and not demo.storm_for(city):
+        raise HTTPException(400, "There is no demo dataset for this city")
+    previous = city.data_mode
+    city.data_mode = body.mode
+    try:
+        citydata.refresh_weather(db, city)
+    except httpx.HTTPError:
+        db.rollback()
+        city.data_mode = previous
+        raise HTTPException(502, "The weather service is not responding, so the data source was not changed.")
+    audit(db, user.email, "set_data_mode", f"{city.name}: {body.mode}")
     hub.broadcast_from_thread({"type": "risk_updated", "city_id": city.id})
     return _city_public(city)
 

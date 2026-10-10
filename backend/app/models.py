@@ -46,6 +46,8 @@ class City(Base):
     weather: Mapped[dict] = mapped_column(JSON, default=dict)
     flood: Mapped[dict] = mapped_column(JSON, default=dict)
     weather_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
+    # "demo" scores the city against its modelled storm (see services/demo.py); anything else is the live forecast.
+    data_mode: Mapped[str | None] = mapped_column(String(10), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
 
 
