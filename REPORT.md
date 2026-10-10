@@ -308,23 +308,8 @@ permission).
 | MapLibre GL 6 | MapLibre GL 5 | Version 6's worker did not load under Next.js's bundler |
 | SQLAlchemy latest | SQLAlchemy 2.0.x | Windows App Control blocked the newer version's compiled file on this machine |
 
-## 12. Presentation slides
 
-1. **Title:** Hack_Yard demo, team, one-line pitch
-2. **Problem:** cities know where assets are, not which will fail
-3. **Existing solutions and the gap** (table from section 2)
-4. **Our solution in one picture:** live data → risk score → cascade → action plan
-5. **Live demo: login and roles** (administrator vs normal user)
-6. **Dashboard and live map:** any city, explainable scores, 72-hour outlook
-7. **Cascade simulator:** fail a bridge or substation, watch hospitals lose access or power
-8. **Stress tests and action plan:** cloudburst scenario, budget-limited priorities
-9. **Citizen side:** alerts, safe route, public advisory, and photo reports: citizen uploads, AI screens,
-   admin verifies, nearby risk scores update live
-10. **Architecture and free data sources** (diagram from section 6)
-11. **What is unique and the impact:** asset-level, preventive, explainable, zero cost
-12. **Limits, roadmap and deployment plan**
-
-## 13. Next steps
+## 12. Next steps
 
 - Admin bulk import (CSV or Excel) for real dependency links, asset attributes and past incidents.
 - Calibrate the risk weights against recorded flood and outage events.
