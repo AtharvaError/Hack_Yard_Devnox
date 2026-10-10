@@ -74,7 +74,8 @@ export function AppProvider({ user, children }: { user: User; children: React.Re
         try {
           saved = localStorage.getItem(CITY_KEY);
         } catch {}
-        setCity(list.find((c) => String(c.id) === saved) ?? list[0] ?? null);
+        // With nothing saved, open on a demo city so the first screen has risk to show.
+        setCity(list.find((c) => String(c.id) === saved) ?? list.find((c) => c.data_mode === "demo") ?? list[0] ?? null);
       })
       .catch(() => {});
   }, []);
