@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
     task.cancel()
 
 
-app = FastAPI(title="Hack_Yard demo API", lifespan=lifespan)
+app = FastAPI(title="InfraSentinel API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],

@@ -83,7 +83,7 @@ export function Sidebar() {
           <ShieldAlert size={18} />
         </span>
         <span className="text-lg font-semibold tracking-tight">
-          Hack_Yard <span className="text-accent">demo</span>
+          Infra<span className="text-accent">Sentinel</span>
         </span>
       </Link>
 

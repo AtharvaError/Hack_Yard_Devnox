@@ -1,4 +1,4 @@
-# Hack_Yard demo: project report
+# InfraSentinel: project report
 
 **Problem statement:** Critical Infrastructure Under Environmental Stress
 
@@ -8,7 +8,7 @@ Roads, bridges, power lines, hospitals and other essential facilities are damage
 landslides and extreme heat. Cities usually know *where* these assets are. What they lack is a clear picture of
 *which* ones will be affected as conditions change, *how badly*, and *what else fails* as a result.
 
-**Hack_Yard demo** answers three questions for any city, using only free and open data:
+**InfraSentinel** answers three questions for any city, using only free and open data:
 
 1. Which assets are at risk in the next 72 hours, and why?
 2. If one fails, what else goes down with it?
@@ -81,7 +81,7 @@ just hidden in the interface.
 ## 5. Screen flow and layout
 
 1. `http://localhost:3000` always opens the **login / sign-up** screen first.
-2. After signing in, the app opens with the name **Hack_Yard demo** at the top of the left sidebar.
+2. After signing in, the app opens with the name **InfraSentinel** at the top of the left sidebar.
 3. The **left sidebar is fixed** to the screen height and does not scroll; only the content area scrolls.
 4. The sidebar tabs depend on the role:
    - **Administrator:** Dashboard, Live Map, Assets · Cascade Simulator, Scenarios, Action Plan · Alerts,

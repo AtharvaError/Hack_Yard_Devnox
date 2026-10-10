@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hack_Yard demo",
+  title: "InfraSentinel",
   description: "Live infrastructure risk intelligence for any city",
 };
 

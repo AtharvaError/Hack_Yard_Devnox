@@ -1,4 +1,4 @@
-# Hack_Yard demo
+# InfraSentinel
 
 Live infrastructure risk intelligence for any city. It scores hospitals, roads, bridges, power and water assets
 against the live weather forecast, shows what fails next when one asset goes down, and ranks where to act first.

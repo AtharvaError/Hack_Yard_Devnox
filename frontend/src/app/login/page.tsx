@@ -49,13 +49,20 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-line bg-side p-12 lg:flex">
-        <div className="pointer-events-none absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-accent/20 blur-3xl" />
+        {/* Decorative city-network illustration, darkened behind the text so it stays readable. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(/login-bg.svg)" }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-side via-side/70 to-side/10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-side/80 to-transparent" />
         <div className="relative flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/20 text-accent">
             <ShieldAlert size={22} />
           </span>
           <span className="text-2xl font-semibold tracking-tight">
-            Hack_Yard <span className="text-accent">demo</span>
+            Infra<span className="text-accent">Sentinel</span>
           </span>
         </div>
         <div className="relative">

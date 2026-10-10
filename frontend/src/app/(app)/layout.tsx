@@ -35,7 +35,7 @@ function Content({ children }: { children: React.ReactNode }) {
           </span>
           <h2 className="mt-4 text-lg font-semibold">Choose a city to analyse</h2>
           <p className="mt-2 mb-5 text-sm text-muted">
-            Type any city in the world. Hack_Yard demo pulls its hospitals, roads, bridges, power and water assets and
+            Type any city in the world. InfraSentinel pulls its hospitals, roads, bridges, power and water assets and
             scores them against the live weather forecast.
           </p>
           <CitySearch autoFocus />

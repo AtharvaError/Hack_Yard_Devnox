@@ -36,7 +36,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{(BASE_DIR / 'hackyard.db')
 CITY_RADIUS_KM = min(float(os.getenv("CITY_RADIUS_KM", "7")), 15.0)
 REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", "15"))
 
-USER_AGENT = "HackYardDemo/0.1 (hackathon prototype; localhost)"
+USER_AGENT = "InfraSentinel/0.1 (hackathon prototype; localhost)"
 
 # Citizen report photos.
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads")))
