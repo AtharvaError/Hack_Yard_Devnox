@@ -55,8 +55,8 @@ export default function LoginPage() {
           className="pointer-events-none absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url(/login-bg.svg)" }}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-side via-side/70 to-side/10" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-side/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-side/90 via-side/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-side/55 to-transparent" />
         <div className="relative flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/20 text-accent">
             <ShieldAlert size={22} />
