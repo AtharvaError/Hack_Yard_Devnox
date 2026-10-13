@@ -13,7 +13,7 @@ from ..live import hub
 from ..models import Asset, City, Dependency, Report, User, utcnow
 from ..services import brief as brief_service
 from ..services import cascade as cascade_service
-from ..services import citydata, demo, routing
+from ..services import citydata, demo, replay, routing
 from ..services import plan as plan_service
 from ..services import risk
 
@@ -33,7 +33,8 @@ class LoadCity(BaseModel):
 
 
 class DataMode(BaseModel):
-    mode: Literal["live", "demo"]
+    mode: Literal["live", "demo", "replay"]
+    date: str | None = None  # YYYY-MM-DD, for replay
 
 
 class CascadeRequest(BaseModel):
@@ -56,7 +57,8 @@ def _city_public(city: City, asset_count: int | None = None) -> dict:
         "radius_km": city.radius_km,
         "weather_at": city.weather_at.isoformat() if city.weather_at else None,
         "asset_count": asset_count,
-        "data_mode": "demo" if storm and city.data_mode == "demo" else "live",
+        "data_mode": "demo" if storm and city.data_mode == "demo" else "replay" if city.data_mode == "replay" else "live",
+        "replay_date": city.replay_date if city.data_mode == "replay" else None,
         "demo_storm": storm["label"] if storm else None,
     }
 
@@ -202,15 +204,20 @@ def set_data_mode(city_id: int, body: DataMode, user: User = Depends(require_adm
     city = _get_city(db, city_id)
     if body.mode == "demo" and not demo.storm_for(city):
         raise HTTPException(400, "There is no demo dataset for this city")
-    previous = city.data_mode
-    city.data_mode = body.mode
+    if body.mode == "replay":
+        try:
+            replay.check_date(body.date or "")
+        except ValueError as exc:
+            raise HTTPException(400, str(exc) if "Pick" in str(exc) else "Give the date as YYYY-MM-DD")
+    previous = (city.data_mode, city.replay_date)
+    city.data_mode, city.replay_date = body.mode, body.date if body.mode == "replay" else None
     try:
         citydata.refresh_weather(db, city)
     except httpx.HTTPError:
         db.rollback()
-        city.data_mode = previous
+        city.data_mode, city.replay_date = previous
         raise HTTPException(502, "The weather service is not responding, so the data source was not changed.")
-    audit(db, user.email, "set_data_mode", f"{city.name}: {body.mode}")
+    audit(db, user.email, "set_data_mode", f"{city.name}: {body.mode} {body.date or ''}".strip())
     hub.broadcast_from_thread({"type": "risk_updated", "city_id": city.id})
     return _city_public(city)
 
@@ -268,11 +275,21 @@ def asset_detail(
     def brief(i: int, kind: str) -> dict:
         return {"id": i, "name": scored[i]["name"], "type": scored[i]["type"], "level": scored[i]["level"], "kind": kind}
 
+    graph = cascade_service.build_graph(assets, deps)
+    served = cascade_service.served_population(city, assets)
+    actions = plan_service.build_plan(list(scored.values()), graph, served, None, None)["selected"]
+    trend = []
+    for h in TREND_HOURS:
+        point = scored if h == horizon else {a["id"]: a for a in risk.score_assets(city, assets, reports, h, scenario)}
+        trend.append({"hour": h, "score": round(point[asset_id]["score"], 1)})
+
     return {
         **scored[asset_id],
+        "trend": trend,
+        "action": next((a for a in actions if a["asset_id"] == asset_id), None),
         "relies_on": [brief(d.source_id, d.kind) for d in deps if d.target_id == asset_id],
         "supports": [brief(d.target_id, d.kind) for d in deps if d.source_id == asset_id],
-        "people": cascade_service.served_population(city, assets).get(asset_id, 0),
+        "people": served.get(asset_id, 0),
     }
 
 

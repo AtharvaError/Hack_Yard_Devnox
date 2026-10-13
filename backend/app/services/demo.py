@@ -13,7 +13,7 @@ from functools import lru_cache
 from sqlalchemy.orm import Session
 
 from .. import config
-from ..models import Asset, City, Dependency, utcnow
+from ..models import Asset, City, Dependency, Place, utcnow
 from .geo import fast_dist_m
 
 DATA_DIR = config.BASE_DIR / "demo_data"
@@ -88,6 +88,8 @@ def seed(db: Session) -> None:
         place = snap["city"]
         existing = next((c for c in cities if fast_dist_m(c.lat, c.lon, place["lat"], place["lon"]) < 2000), None)
         if existing:
+            if snap.get("places") and not db.query(Place).filter(Place.city_id == existing.id).first():
+                db.add_all(Place(city_id=existing.id, **p) for p in snap["places"])
             if existing.data_mode is None:  # loaded before the demo dataset existed
                 existing.data_mode = "demo"
                 existing.weather, existing.flood = storm_weather(snap["storm"])
@@ -104,4 +106,5 @@ def seed(db: Session) -> None:
             Dependency(city_id=city.id, source_id=assets[s].id, target_id=assets[t].id, kind=kind)
             for s, t, kind in snap["dependencies"]
         )
+        db.add_all(Place(city_id=city.id, **p) for p in snap.get("places", []))
     db.commit()

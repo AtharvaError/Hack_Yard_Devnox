@@ -9,7 +9,7 @@ from .auth import hash_password
 from .db import Base, SessionLocal, add_missing_columns, engine
 from .live import hub
 from .models import City, User
-from .routers import admin, auth, city, community
+from .routers import admin, auth, city, community, extras
 from .services import citydata, demo, photos
 
 
@@ -68,7 +68,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-for module in (auth, city, community, admin):
+for module in (auth, city, community, admin, extras):
     app.include_router(module.router)
 
 

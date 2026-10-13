@@ -48,6 +48,8 @@ class City(Base):
     weather_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     # "demo" scores the city against its modelled storm (see services/demo.py); anything else is the live forecast.
     data_mode: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    # Set while data_mode is "replay": the past date whose recorded weather is being replayed.
+    replay_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
 
 
@@ -130,3 +132,31 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String(80))
     detail: Mapped[str] = mapped_column(Text, default="")
     at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class Task(Base):
+    """A plan action that has been handed to a crew, so progress can be followed."""
+
+    __tablename__ = "tasks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), index=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"))
+    asset_name: Mapped[str] = mapped_column(String(200))
+    action: Mapped[str] = mapped_column(Text)
+    crew: Mapped[str] = mapped_column(String(120), default="")
+    status: Mapped[str] = mapped_column(String(20), default="assigned")  # assigned | in_progress | done
+    created_by: Mapped[str] = mapped_column(String(255), default="")
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class Place(Base):
+    """A possible relief point (school, community hall, shelter) from OpenStreetMap. Not a risk-scored asset."""
+
+    __tablename__ = "places"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(30))  # school | community_centre | shelter
+    name: Mapped[str] = mapped_column(String(200))
+    lat: Mapped[float] = mapped_column(Float)
+    lon: Mapped[float] = mapped_column(Float)
