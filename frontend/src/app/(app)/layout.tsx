@@ -3,9 +3,11 @@
 import { Loader2, MapPinned } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
 import { CitySearch, Topbar } from "@/components/Topbar";
 import { ApiError, api, type User } from "@/lib/api";
+import { LangProvider } from "@/lib/i18n";
 import { AppProvider, useApp } from "@/lib/store";
 
 function Content({ children }: { children: React.ReactNode }) {
@@ -88,15 +90,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AppProvider user={user}>
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar />
-          <main className="min-h-0 flex-1 overflow-y-auto p-6">
-            <Content>{children}</Content>
-          </main>
+      <LangProvider>
+        <div className="flex h-dvh overflow-hidden">
+          <Sidebar />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Topbar />
+            <main className="min-h-0 flex-1 overflow-y-auto p-3 md:p-6">
+              <Content>{children}</Content>
+            </main>
+            <MobileNav />
+          </div>
         </div>
-      </div>
+      </LangProvider>
     </AppProvider>
   );
 }

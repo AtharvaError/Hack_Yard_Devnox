@@ -1,17 +1,19 @@
 "use client";
 
 import { Satellite } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AssetDetailPanel } from "@/components/AssetDetailPanel";
 import { Legend, RiskMap, assetPoint } from "@/components/RiskMap";
 import { Card, ErrorNote, LevelBadge, PageTitle } from "@/components/ui";
-import type { AssetType, Overview } from "@/lib/api";
+import type { ReliefPoint, AssetType, Overview } from "@/lib/api";
 import { TYPE_LABEL, TYPE_SINGULAR } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
 function yesterday(): string {
   return new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 }
+
+const RELIEF_COLOR = "#60a5fa";
 
 export default function MapPage() {
   const { city, isAdmin, riskQuery } = useApp();
@@ -20,12 +22,21 @@ export default function MapPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [satellite, setSatellite] = useState(false);
   const [date, setDate] = useState(yesterday);
+  const [relief, setRelief] = useState(false);
+  const places = useApi<ReliefPoint[]>(city && relief ? `/api/cities/${city.id}/places` : null);
+
+  // The citizen home links here with the relief points already switched on.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("relief")) setRelief(true);
+  }, []);
 
   const types = useMemo(() => [...new Set(data?.assets.map((a) => a.type) ?? [])], [data]);
-  const points = useMemo(
-    () => (data?.assets ?? []).filter((a) => !hidden.has(a.type)).map((a) => assetPoint(a, a.id === selected)),
-    [data, hidden, selected],
-  );
+  const points = useMemo(() => {
+    const assets = (data?.assets ?? []).filter((a) => !hidden.has(a.type)).map((a) => assetPoint(a, a.id === selected));
+    // Relief points get negative ids so they never clash with assets, and one colour of their own.
+    const extra = relief ? (places.data ?? []).map((p) => ({ id: -p.id, name: p.name, lat: p.lat, lon: p.lon, color: RELIEF_COLOR, label: `${p.label} · possible relief point` })) : [];
+    return [...extra, ...assets];
+  }, [data, hidden, selected, relief, places.data]);
   const center = useMemo<[number, number]>(() => [city!.lon, city!.lat], [city]);
   const picked = data?.assets.find((a) => a.id === selected);
 
@@ -50,7 +61,7 @@ export default function MapPage() {
           <RiskMap
             center={center}
             points={points}
-            onSelect={setSelected}
+            onSelect={(id) => id > 0 && setSelected(id)}
             satelliteDate={satellite ? date : null}
             className="h-[calc(100vh-230px)] min-h-[420px]"
           />
@@ -71,6 +82,20 @@ export default function MapPage() {
                   {TYPE_LABEL[type]}
                 </button>
               ))}
+            </div>
+            <div className="mt-4 border-t border-line pt-4">
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input type="checkbox" checked={relief} onChange={(e) => setRelief(e.target.checked)} className="accent-[#60a5fa]" />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: RELIEF_COLOR }} />
+                Relief points {relief && places.data ? `(${places.data.length})` : ""}
+              </label>
+              {relief && places.error && <p className="mt-2 text-xs text-critical">{places.error}</p>}
+              {relief && (
+                <p className="mt-2 text-xs text-muted">
+                  Schools, community halls and shelters from OpenStreetMap that could serve as relief points. They are
+                  not official shelters and are not risk-scored.
+                </p>
+              )}
             </div>
             <div className="mt-4 border-t border-line pt-4">
               <label className="flex cursor-pointer items-center gap-2 text-sm">

@@ -2,6 +2,7 @@
 
 import { Check, Radio } from "lucide-react";
 import { AdminOnly } from "@/components/AdminOnly";
+import { ReplayCard } from "@/components/ReplayCard";
 import { ErrorNote, LevelBadge, PageTitle, Skeleton } from "@/components/ui";
 import type { Overview, Scenario } from "@/lib/api";
 import { LEVEL_COLOR } from "@/lib/labels";
@@ -64,6 +65,7 @@ function ScenariosView() {
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         <ScenarioCard id={null} name="Live forecast" description="Real conditions from the current weather and river forecast." />
         {data?.map((s) => <ScenarioCard key={s.id} {...s} />)}
+        <ReplayCard />
       </div>
     </div>
   );

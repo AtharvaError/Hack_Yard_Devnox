@@ -1,8 +1,9 @@
 "use client";
 
-import { X } from "lucide-react";
-import type { AssetDetail, AssetLink } from "@/lib/api";
-import { HAZARD_COLOR, HAZARD_LABEL, TYPE_SINGULAR, formatPeople } from "@/lib/labels";
+import { ArrowRight, GitFork, UserPlus, X } from "lucide-react";
+import Link from "next/link";
+import { api, type AssetDetail, type AssetLink } from "@/lib/api";
+import { HAZARD_COLOR, HAZARD_LABEL, LEVEL_COLOR, TYPE_SINGULAR, formatPeople } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 import { ErrorNote, LevelBadge, Skeleton } from "./ui";
 
@@ -26,12 +27,46 @@ function Links({ title, items }: { title: string; items: AssetLink[] }) {
   );
 }
 
-/** Admin-only: why an asset has its score, and what it is connected to. */
+/** The asset's own score over the next 72 hours, drawn without a chart library. */
+function Outlook({ trend, color }: { trend: AssetDetail["trend"]; color: string }) {
+  const width = 280;
+  const height = 48;
+  const top = Math.max(...trend.map((p) => p.score), 20);
+  const points = trend.map((p, i) => `${(i * width) / (trend.length - 1)},${height - (p.score / top) * (height - 6)}`).join(" ");
+  return (
+    <div>
+      <div className="mb-1.5 flex justify-between text-xs text-muted">
+        <span>Next 72 hours</span>
+        <span className="tabular-nums">
+          {Math.round(trend[0].score)} now, {Math.round(trend[trend.length - 1].score)} at +72 h
+        </span>
+      </div>
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label="Risk score over the next 72 hours">
+        <polygon points={`0,${height} ${points} ${width},${height}`} fill={color} opacity={0.18} />
+        <polyline points={points} fill="none" stroke={color} strokeWidth={2} />
+      </svg>
+    </div>
+  );
+}
+
+/** Admin-only: why an asset has its score, what fails with it, and what to do about it. */
 export function AssetDetailPanel({ assetId, onClose }: { assetId: number; onClose: () => void }) {
-  const { city, riskQuery } = useApp();
+  const { city, riskQuery, notify } = useApp();
   const { data, error, reload } = useApi<AssetDetail>(
     city ? `/api/cities/${city.id}/assets/${assetId}?${riskQuery}` : null,
   );
+
+  const assign = async () => {
+    if (!data?.action) return;
+    const crew = window.prompt(`Which crew takes "${data.action.action}" at ${data.name}?`, "Crew A");
+    if (crew === null) return;
+    try {
+      await api(`/api/cities/${city!.id}/tasks`, { body: { asset_id: data.id, action: data.action.action, crew } });
+      notify(`Assigned to ${crew || "a crew"}. Follow it on the Action Plan page.`);
+    } catch (err) {
+      notify((err as Error).message, "error");
+    }
+  };
 
   return (
     <div className="card p-5">
@@ -50,7 +85,7 @@ export function AssetDetailPanel({ assetId, onClose }: { assetId: number; onClos
       {data && (
         <div className="mt-4 space-y-5">
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-semibold tabular-nums">{Math.round(data.score)}</span>
+            <span className="text-3xl font-semibold tabular-nums" style={{ color: LEVEL_COLOR[data.level] }}>{Math.round(data.score)}</span>
             <span className="text-sm text-muted">/ 100</span>
             <LevelBadge level={data.level} />
           </div>
@@ -83,6 +118,35 @@ export function AssetDetailPanel({ assetId, onClose }: { assetId: number; onClos
             )}
           </div>
 
+          {data.trend.length > 1 && <Outlook trend={data.trend} color={LEVEL_COLOR[data.level]} />}
+
+          {data.action && (
+            <div className="rounded-xl border border-accent/50 bg-accent/10 p-3">
+              <div className="text-xs font-medium text-accent">Recommended action</div>
+              <p className="mt-1 text-sm font-medium">{data.action.action}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+                <span className="flex items-center gap-1 tabular-nums">
+                  Risk {Math.round(data.action.score)} <ArrowRight size={12} /> <span className="text-low">{Math.round(data.action.risk_after)}</span>
+                </span>
+                <span>₹{data.action.cost} lakh</span>
+                <span>{data.action.crews} crew{data.action.crews > 1 ? "s" : ""}</span>
+              </div>
+              <button className="btn mt-3 !px-3 !py-1.5 text-xs" onClick={assign}>
+                <UserPlus size={13} /> Assign a crew
+              </button>
+            </div>
+          )}
+
+          {data.supports.length > 0 && (
+            <div className="rounded-xl border border-critical/40 bg-critical/10 p-3">
+              <div className="mb-2 text-xs font-medium text-critical">If this fails</div>
+              <Links title={`${data.supports.length} asset${data.supports.length > 1 ? "s" : ""} rely on it`} items={data.supports} />
+              <Link href={`/cascade?fail=${data.id}`} className="btn btn-ghost mt-3 !px-3 !py-1.5 text-xs">
+                <GitFork size={13} /> Simulate this failure
+              </Link>
+            </div>
+          )}
+
           <dl className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className="rounded-lg bg-panel-2 p-2">
               <dt className="text-muted">Elevation</dt>
@@ -105,9 +169,8 @@ export function AssetDetailPanel({ assetId, onClose }: { assetId: number; onClos
             </p>
           )}
           <Links title="Relies on" items={data.relies_on} />
-          <Links title="Supports" items={data.supports} />
           {(data.relies_on.length > 0 || data.supports.length > 0) && (
-            <p className="text-xs text-muted">Links are estimated from proximity, not surveyed.</p>
+            <p className="text-xs text-muted">Links are estimated from proximity unless real ones have been imported.</p>
           )}
         </div>
       )}

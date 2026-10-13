@@ -1,10 +1,11 @@
 "use client";
 
-import { Megaphone, Trash2 } from "lucide-react";
+import { Megaphone, Share2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Card, Empty, ErrorNote, PageTitle, Skeleton } from "@/components/ui";
 import { api, type Alert } from "@/lib/api";
-import { capitalize, timeAgo } from "@/lib/labels";
+import { useT } from "@/lib/i18n";
+import { capitalize, timeAgo, whatsappLink } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
 const SEVERITY_COLOR = { advisory: "#60a5fa", warning: "#fb923c", emergency: "#f43f5e" };
@@ -16,6 +17,7 @@ export default function AlertsPage() {
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<Alert["severity"]>("advisory");
   const [busy, setBusy] = useState(false);
+  const t = useT();
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +93,12 @@ export default function AlertsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-sm whitespace-pre-wrap text-muted">{a.message}</p>
-                  <p className="mt-2 text-xs text-muted">{timeAgo(a.created_at)}</p>
+                  <p className="mt-2 flex flex-wrap items-center gap-x-4 text-xs text-muted">
+                    {timeAgo(a.created_at)}
+                    <a href={whatsappLink(a, city!.name)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-low hover:underline">
+                      <Share2 size={13} /> {t("share")}
+                    </a>
+                  </p>
                 </div>
                 {isAdmin && (
                   <button onClick={() => remove(a)} aria-label={`Delete alert ${a.title}`} className="self-start text-muted hover:text-critical">

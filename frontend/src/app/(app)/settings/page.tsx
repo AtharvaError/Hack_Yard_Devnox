@@ -3,6 +3,7 @@
 import { Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { AdminOnly } from "@/components/AdminOnly";
+import { LinkImport } from "@/components/LinkImport";
 import { Card, Empty, ErrorNote, PageTitle, Skeleton, Stat } from "@/components/ui";
 import { api, type City } from "@/lib/api";
 import { timeAgo } from "@/lib/labels";
@@ -87,11 +88,13 @@ function SettingsView() {
           )}
         </Card>
 
+        <div className="space-y-5">
+        <LinkImport onDone={audit.reload} />
         <Card title="Activity log">
           {audit.error && <ErrorNote message={audit.error} onRetry={audit.reload} />}
           {!audit.data && !audit.error && <Skeleton className="h-64" />}
           {audit.data?.length === 0 && <Empty>No activity recorded yet.</Empty>}
-          <ul className="max-h-[calc(100vh-280px)] space-y-2 overflow-auto pr-1">
+          <ul className="max-h-[calc(100vh-520px)] min-h-56 space-y-2 overflow-auto pr-1">
             {audit.data?.map((row) => (
               <li key={row.id} className="flex items-baseline justify-between gap-3 border-b border-line pb-2 text-sm last:border-0">
                 <span className="min-w-0 truncate">
@@ -104,6 +107,7 @@ function SettingsView() {
             ))}
           </ul>
         </Card>
+        </div>
       </div>
     </div>
   );

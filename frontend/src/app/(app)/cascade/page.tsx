@@ -23,6 +23,12 @@ function CascadeView() {
   const { city, riskQuery, horizon, scenario, notify } = useApp();
   const { data, error, reload } = useApi<Overview>(city ? `/api/cities/${city.id}/overview?${riskQuery}` : null);
   const [failed, setFailed] = useState<number[]>([]);
+
+  // The asset panel's "Simulate failure" button sends people here with the asset already chosen.
+  useEffect(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("fail"));
+    if (id) setFailed([id]);
+  }, []);
   const [result, setResult] = useState<CascadeResult | null>(null);
   const [step, setStep] = useState(0);
   const [running, setRunning] = useState(false);

@@ -45,7 +45,8 @@ export type City = {
   weather_at: string | null;
   asset_count: number | null;
   // "demo" means scores come from the city's modelled storm, not the live forecast.
-  data_mode: "live" | "demo";
+  data_mode: "live" | "demo" | "replay";
+  replay_date: string | null; // the past date being replayed, when data_mode is "replay"
   demo_storm: string | null; // name of the modelled storm, when the city has a demo dataset
 };
 
@@ -75,7 +76,13 @@ export type Asset = {
 };
 
 export type AssetLink = { id: number; name: string; type: AssetType; level: Level; kind: string };
-export type AssetDetail = Required<Asset> & { relies_on: AssetLink[]; supports: AssetLink[]; people: number };
+export type AssetDetail = Required<Asset> & {
+  relies_on: AssetLink[];
+  supports: AssetLink[];
+  people: number;
+  trend: { hour: number; score: number }[];
+  action: PlanAction | null;
+};
 
 export type Weather = { rain24: number; antecedent: number; apparent_max: number; gust: number; river_ratio: number };
 
@@ -135,6 +142,32 @@ export type Plan = {
   deferred: PlanAction[];
   totals: { cost: number; crews: number; actions: number; people: number; benefit_share: number };
 };
+
+type Picture = { score: number; level: Level; at_risk: number; isolated_hospitals: number };
+export type PlanEffect = {
+  before: Picture;
+  after: Picture;
+  actions: number;
+  cost: number;
+  crews: number;
+  max_cost: number;
+  by_type: { type: AssetType; removed: number }[];
+};
+
+export type Zone = { name: string; row: number; col: number; assets: number; at_risk: number; level: Level; score: number | null };
+
+export type Task = {
+  id: number;
+  asset_id: number;
+  asset: string;
+  action: string;
+  crew: string;
+  status: "assigned" | "in_progress" | "done";
+  created_by: string;
+  updated_at: string;
+};
+
+export type ReliefPoint = { id: number; kind: string; label: string; name: string; lat: number; lon: number };
 
 export type Alert = {
   id: number;

@@ -67,6 +67,29 @@ open in demo mode, so the dashboard, map, cascade simulator and action plan alwa
   **Use demo data** to switch back.
 - Every other city uses the live forecast only.
 
+## Planning and citizen features
+
+- **Command Centre:** the administrator's first screen puts the map, five headline numbers, the top risks
+  and the next three actions together. A play button steps the map through the next 72 hours.
+- **Asset panel:** click an asset to see why it scored that way, its own 72-hour outlook, what relies on
+  it, and the recommended action, with buttons to assign a crew or simulate its failure.
+- **What if we act?** On the Action Plan page, a budget slider shows the city's risk before and after
+  the plan. It assumes every selected action is completed, so treat it as an estimate.
+- **Crew tasks:** assign a plan action to a named crew and track it as assigned, in progress or done.
+- **Risk by zone:** the analysed area split into a three-by-three compass grid. These are not official wards.
+- **Relief points:** schools, community halls and shelters from OpenStreetMap as a map layer. They are
+  possible relief points, not official shelters.
+- **Replay a past date:** on the Scenarios page, score a city against the weather recorded on a past
+  date (Open-Meteo archive, back to 1984). It uses today's assets, so it is a check, not a reconstruction.
+- **Import real links:** in Settings, download the current links between assets as CSV and upload real
+  ones (`source,target,kind`) to replace the distance-based estimates.
+- **Phone layout:** on a narrow screen the sidebar becomes a bottom tab bar, and citizens get a home
+  screen with their area's status, a safe-route button and a report button.
+- **Languages:** the citizen home screen and navigation are available in English, Hindi, Marathi and
+  Malayalam. The translations have not been reviewed by native speakers, and other screens are English only.
+- **Share on WhatsApp:** each alert has a link that opens WhatsApp with the text ready to send.
+- **Saved alerts:** the citizen home screen shows the last alerts it loaded if the server cannot be reached.
+
 ## First use
 
 After signing in, type any city into the search box. A new city takes roughly 20 to 60 seconds to build

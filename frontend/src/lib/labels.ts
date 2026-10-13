@@ -70,3 +70,8 @@ export function formatPeople(n: number): string {
   if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
   return String(n);
 }
+
+/** Opens WhatsApp with the alert ready to send to a contact or group. Free, and uses the sender's own account. */
+export function whatsappLink(alert: { title: string; message: string }, cityName: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(`${alert.title} (${cityName})\n${alert.message}\nSent through InfraSentinel`)}`;
+}

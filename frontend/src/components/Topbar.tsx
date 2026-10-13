@@ -1,9 +1,10 @@
 "use client";
 
-import { Bell, FlaskConical, Loader2, MapPin, Search, X } from "lucide-react";
+import { Bell, FlaskConical, History, Languages, Loader2, MapPin, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, type City, type Place } from "@/lib/api";
+import { LANGS, useLang } from "@/lib/i18n";
 import { HORIZONS } from "@/lib/labels";
 import { useApp } from "@/lib/store";
 
@@ -104,6 +105,28 @@ export function CitySearch({ autoFocus = false }: { autoFocus?: boolean }) {
 function DataModePill() {
   const { city, isAdmin, selectCity, notify } = useApp();
   const [busy, setBusy] = useState(false);
+  if (city?.data_mode === "replay") {
+    const back = async () => {
+      setBusy(true);
+      try {
+        selectCity(await api<City>(`/api/cities/${city.id}/data-mode`, { body: { mode: city.demo_storm ? "demo" : "live" } }));
+        notify("Replay ended.");
+      } catch (err) {
+        notify((err as Error).message, "error");
+      } finally {
+        setBusy(false);
+      }
+    };
+    const look = "flex shrink-0 items-center gap-1.5 rounded-full border border-moderate/50 bg-moderate/10 px-3 py-1.5 text-xs font-medium text-moderate";
+    const text = <><History size={13} /> Replay of {city.replay_date}</>;
+    return isAdmin ? (
+      <button onClick={back} disabled={busy} className={look} title="Scores use the weather recorded on this past date. Click to end the replay.">
+        {text} <X size={13} />
+      </button>
+    ) : (
+      <span className={look} title="Scores use the weather recorded on this past date, not today's.">{text}</span>
+    );
+  }
   if (!city?.demo_storm) return null;
   const demo = city.data_mode === "demo";
   if (!demo && !isAdmin) return null;
@@ -148,11 +171,32 @@ function DataModePill() {
   );
 }
 
+function LangSwitch() {
+  const { lang, setLang } = useLang();
+  return (
+    <label className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-panel px-2 py-1 text-xs text-muted" title="Language of the citizen screens">
+      <Languages size={14} />
+      <select
+        value={lang}
+        onChange={(e) => setLang(e.target.value as typeof lang)}
+        aria-label="Language"
+        className="bg-transparent text-ink outline-none"
+      >
+        {LANGS.map((l) => (
+          <option key={l.code} value={l.code} className="bg-panel">
+            {l.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export function Topbar() {
   const { user, isAdmin, city, horizon, setHorizon, scenario, setScenario, badges } = useApp();
 
   return (
-    <header className="no-print flex h-16 shrink-0 items-center gap-4 border-b border-line px-6">
+    <header className="no-print flex h-16 shrink-0 items-center gap-2 border-b border-line px-3 md:gap-4 md:px-6">
       <div className="hidden min-w-0 shrink-0 lg:block">
         <div className="flex items-center gap-2 text-sm font-semibold">
           Welcome, {user.name}
@@ -185,7 +229,9 @@ export function Topbar() {
         </button>
       )}
 
-      <div className="flex shrink-0 rounded-full border border-line bg-panel p-0.5" role="group" aria-label="Forecast time">
+      <LangSwitch />
+
+      <div className="hidden shrink-0 rounded-full border border-line bg-panel p-0.5 sm:flex" role="group" aria-label="Forecast time">
         {HORIZONS.map((h) => (
           <button
             key={h.value}
