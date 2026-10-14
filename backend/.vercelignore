@@ -1,0 +1,7 @@
+# Never upload local secrets, data or the virtual environment.
+.env
+.venv/
+hackyard.db
+uploads/
+__pycache__/
+*.pyc

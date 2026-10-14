@@ -1,0 +1,5 @@
+# Build output and local files stay local.
+.next/
+.next-build/
+node_modules/
+.env*

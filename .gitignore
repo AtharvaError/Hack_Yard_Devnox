@@ -11,3 +11,6 @@ node_modules/
 
 # Claude desktop app session folders
 .claude/
+
+# Vercel CLI project links
+.vercel/
