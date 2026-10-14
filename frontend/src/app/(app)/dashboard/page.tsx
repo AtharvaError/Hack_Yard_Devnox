@@ -31,7 +31,7 @@ function Kpi({ label, value, hint, color, icon: Icon }: { label: string; value: 
         </span>
       </div>
       <div>
-        <div className="font-display mt-2 text-[28px] leading-tight font-bold tabular-nums">{value}</div>
+        <div className="font-display mt-2 text-[28px] leading-tight font-bold whitespace-nowrap tabular-nums">{value}</div>
         <div className="truncate text-xs font-medium" style={{ color }}>{hint}</div>
       </div>
     </div>
@@ -46,7 +46,7 @@ function ScoreHero({ score, level, label, note }: { score: number; level: Level;
   const arc = circ * 0.75;
   const filled = arc * Math.min(score, 1000) / 1000;
   return (
-    <div className="tile col-span-2 flex items-center gap-5 p-4 lg:col-span-1" style={{ "--tone": color } as React.CSSProperties}>
+    <div className="tile col-span-2 flex items-center gap-5 p-4 lg:col-span-1 lg:row-span-2 lg:flex-col lg:justify-center lg:text-center 2xl:row-span-1 2xl:flex-row 2xl:text-left" style={{ "--tone": color } as React.CSSProperties}>
       <div className="relative h-[124px] w-[124px] shrink-0">
         <svg viewBox="0 0 124 124" className="h-full w-full rotate-[135deg]">
           <circle cx="62" cy="62" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${arc} ${circ}`} />
@@ -172,7 +172,7 @@ function CommandCentre({ data }: { data: Overview }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-[minmax(300px,1.5fr)_repeat(4,minmax(0,1fr))]">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-[minmax(300px,1.5fr)_repeat(4,minmax(0,1fr))]">
         <ScoreHero
           score={data.score}
           level={data.level}
