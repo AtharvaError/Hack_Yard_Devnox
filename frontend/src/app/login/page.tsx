@@ -4,6 +4,7 @@ import { Activity, ArrowRight, GitFork, ListChecks, Loader2 } from "lucide-react
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { api, type User } from "@/lib/api";
 
 type Demo = { label: string; email: string; password: string };
@@ -137,9 +138,11 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
-      <div className="relative m-3 mr-0 hidden flex-col justify-between overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-[#0b1030] via-[#080a1c] to-[#14081f] p-12 lg:flex">
+      <div className="hero-panel relative m-3 mr-0 hidden overflow-hidden rounded-3xl border border-ink/5 lg:flex">
         <HeroNetwork />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06071a] via-transparent to-[#06071a]/70" />
+        <div className="hero-shade pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06071a] via-transparent to-[#06071a]/70" />
+        {/* The hero keeps dark-theme text colours in both themes; its background changes with the theme. */}
+        <div data-theme="dark" className="relative flex flex-1 flex-col justify-between p-12">
         <div className="relative">
           <Logo size={48} textClass="text-[26px]" />
         </div>
@@ -166,9 +169,11 @@ export default function LoginPage() {
         <p className="relative text-xs text-muted">
           Built on free, open data: OpenStreetMap, Open-Meteo, Copernicus and NASA.
         </p>
+        </div>
       </div>
 
-      <div className="grid place-items-center p-6">
+      <div className="relative grid place-items-center p-6">
+        <ThemeToggle className="absolute top-6 right-6" />
         <div className="page-enter w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <Logo size={42} textClass="text-2xl" />

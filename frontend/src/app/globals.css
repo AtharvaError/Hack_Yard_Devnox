@@ -3,14 +3,19 @@
 @source "../";
 
 /*
- * InfraSentinel "Neon Pulse" theme: a near-black navy base, glass panels, and three neon accents
- * (cyan, violet, magenta). The risk colours stay distinct from the accents so meaning never blurs.
+ * Two themes share one set of tokens:
+ * - Dark, "Neon Pulse": a near-black navy base, glass panels, cyan, violet and magenta accents.
+ * - Light: white cards on a soft lavender base, indigo and blue accents, Plus Jakarta Sans.
+ * The dark values are the defaults; [data-theme="light"] on <html> swaps them. Any element can
+ * carry data-theme="dark" to stay dark inside a light page (the login hero does).
  */
 @theme inline {
-  --font-sans: var(--font-body);
-  --font-display: var(--font-heading);
+  --font-sans: var(--app-body);
+  --font-display: var(--app-heading);
   --font-mono: var(--font-code);
+}
 
+@theme {
   --color-bg: #05060d;
   --color-side: #080a16;
   --color-panel: #0c0f20;
@@ -29,15 +34,108 @@
   --color-critical: #ff3b6b;
 }
 
-:root {
+:root,
+[data-theme="dark"] {
+  --app-body: var(--font-body);
+  --app-heading: var(--font-heading);
+
+  --hz-flood: #3ea8ff;
+  --hz-heat: #ff4fd8;
+  --hz-landslide: #b06bff;
+  --hz-wind: #22f0d0;
+  --unaffected: #2a3160;
+
   --neon: linear-gradient(110deg, #00e5ff 0%, #7c5cff 50%, #ff3cac 100%);
+  --btn: linear-gradient(120deg, #00e5ff, #6f7bff 70%, #8c5cff);
   --glass: linear-gradient(180deg, rgb(20 25 54 / 0.72), rgb(10 12 28 / 0.78));
   --glass-line: rgb(122 140 255 / 0.13);
+  --card-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 18px 40px -24px rgb(0 0 0 / 0.9);
+  --field: rgb(8 10 24 / 0.7);
+  --ghost: rgb(18 22 48 / 0.7);
+  --aurora-1: rgb(0 229 255 / 0.13);
+  --aurora-2: rgb(124 92 255 / 0.16);
+  --aurora-3: rgb(255 60 172 / 0.1);
+  --grid-line: rgb(122 140 255 / 0.05);
+  --skeleton-a: #0c0f22;
+  --skeleton-b: #161b3a;
+  --scrollbar: #262d58;
+  --popup: rgb(12 15 32 / 0.95);
+  --hero: linear-gradient(135deg, #0b1030, #080a1c 55%, #14081f);
+  color-scheme: dark;
+}
+
+[data-theme="dark"] {
+  --color-bg: #05060d;
+  --color-side: #080a16;
+  --color-panel: #0c0f20;
+  --color-panel-2: #121630;
+  --color-line: #1e2445;
+  --color-ink: #eef1ff;
+  --color-muted: #8a90b8;
+  --color-accent: #00e5ff;
+  --color-accent-2: #7c5cff;
+  --color-accent-3: #ff3cac;
+  --color-on-accent: #02131a;
+  --color-low: #2bff9e;
+  --color-moderate: #ffd60a;
+  --color-high: #ff8f1f;
+  --color-critical: #ff3b6b;
+  color: var(--color-ink);
+}
+
+[data-theme="light"] {
+  --app-body: var(--font-jakarta);
+  --app-heading: var(--font-jakarta);
+
+  --color-bg: #f3f4fb;
+  --color-side: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-2: #f1f2f9;
+  --color-line: #e3e6f1;
+  --color-ink: #101436;
+  --color-muted: #6b7194;
+  --color-accent: #4f46e5;
+  --color-accent-2: #2563eb;
+  --color-accent-3: #9333ea;
+  --color-on-accent: #ffffff;
+
+  --color-low: #059669;
+  --color-moderate: #d97706;
+  --color-high: #ea580c;
+  --color-critical: #e11d48;
+
+  --hz-flood: #2563eb;
+  --hz-heat: #db2777;
+  --hz-landslide: #7c3aed;
+  --hz-wind: #0d9488;
+  --unaffected: #c9cde0;
+
+  --neon: linear-gradient(110deg, #7c3aed 0%, #4f46e5 50%, #2563eb 100%);
+  --btn: linear-gradient(120deg, #6366f1, #4f46e5 55%, #2563eb);
+  --glass: #ffffff;
+  --glass-line: #e6e8f2;
+  --card-shadow: 0 1px 2px rgb(16 20 54 / 0.04), 0 12px 32px -18px rgb(79 70 229 / 0.22);
+  --field: #f6f7fc;
+  --ghost: #ffffff;
+  --aurora-1: rgb(139 92 246 / 0.16);
+  --aurora-2: rgb(59 130 246 / 0.16);
+  --aurora-3: rgb(99 102 241 / 0.1);
+  --grid-line: rgb(79 70 229 / 0.045);
+  --skeleton-a: #eceef7;
+  --skeleton-b: #f7f8fd;
+  --scrollbar: #c9cde3;
+  --popup: rgb(255 255 255 / 0.98);
+  --hero: linear-gradient(140deg, #8b5cf6 0%, #6366f1 45%, #3b82f6 100%);
+  color-scheme: light;
+}
+
+:root {
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
   background: var(--color-bg);
+  transition: background-color 0.3s;
 }
 html,
 body {
@@ -47,7 +145,7 @@ body {
 body {
   position: relative;
   color: var(--color-ink);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--app-body), system-ui, sans-serif;
 }
 
 /* Slow-moving aurora behind everything, plus a faint engineering grid that fades towards the edges. */
@@ -62,15 +160,15 @@ body::after {
 body::before {
   inset: -20%;
   background:
-    radial-gradient(38% 32% at 18% 12%, rgb(0 229 255 / 0.13), transparent 70%),
-    radial-gradient(34% 30% at 85% 18%, rgb(124 92 255 / 0.16), transparent 70%),
-    radial-gradient(40% 36% at 70% 92%, rgb(255 60 172 / 0.1), transparent 70%);
+    radial-gradient(38% 32% at 18% 12%, var(--aurora-1), transparent 70%),
+    radial-gradient(34% 30% at 85% 18%, var(--aurora-2), transparent 70%),
+    radial-gradient(40% 36% at 70% 92%, var(--aurora-3), transparent 70%);
   animation: aurora 26s ease-in-out infinite alternate;
 }
 body::after {
   background-image:
-    linear-gradient(rgb(122 140 255 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(122 140 255 / 0.05) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 85%);
 }
@@ -90,17 +188,17 @@ h1,
 h2,
 h3,
 .font-display {
-  font-family: var(--font-heading), var(--font-body), sans-serif;
+  font-family: var(--app-heading), var(--app-body), sans-serif;
   letter-spacing: -0.02em;
 }
 
 ::selection {
-  background: rgb(0 229 255 / 0.3);
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #262d58 transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 
 :focus-visible {
@@ -108,21 +206,25 @@ h3,
   outline-offset: 2px;
 }
 
+/* Neon glows read as smudges on white, so the light theme drops inline text glows. */
+[data-theme="light"] [style*="text-shadow"] {
+  text-shadow: none !important;
+}
+
 @layer components {
-  /* Glass panel with a hairline highlight along the top edge. */
+  /* Panel with a hairline highlight along the top edge: glass in dark, white card in light. */
   .card {
     position: relative;
     background: var(--glass);
     border: 1px solid var(--glass-line);
     border-radius: 20px;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.04),
-      0 18px 40px -24px rgb(0 0 0 / 0.9);
+    box-shadow: var(--card-shadow);
     backdrop-filter: blur(14px);
     transition:
       border-color 0.25s,
       box-shadow 0.25s,
-      transform 0.25s var(--ease-out);
+      transform 0.25s var(--ease-out),
+      background-color 0.3s;
   }
   .card::before {
     content: "";
@@ -131,16 +233,16 @@ h3,
     left: 12%;
     right: 12%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.55), rgb(255 60 172 / 0.45), transparent);
-    opacity: 0.55;
+    background: linear-gradient(90deg, transparent, var(--color-accent), var(--color-accent-3), transparent);
+    opacity: 0.45;
     pointer-events: none;
   }
   .card-hover:hover {
-    border-color: rgb(0 229 255 / 0.45);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.05),
-      0 0 0 1px rgb(0 229 255 / 0.12),
-      0 20px 50px -20px rgb(0 229 255 / 0.35);
+      var(--card-shadow),
+      0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent),
+      0 20px 50px -20px color-mix(in srgb, var(--color-accent) 35%, transparent);
     transform: translateY(-2px);
   }
 
@@ -166,7 +268,7 @@ h3,
     width: 80%;
     aspect-ratio: 1;
     border-radius: 999px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--tone) 22%, transparent), transparent 65%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--tone) 18%, transparent), transparent 65%);
     pointer-events: none;
   }
   .tile:hover {
@@ -176,7 +278,7 @@ h3,
 
   .input {
     width: 100%;
-    background: rgb(8 10 24 / 0.7);
+    background: var(--field);
     border: 1px solid var(--color-line);
     border-radius: 12px;
     padding: 0.6rem 0.8rem;
@@ -188,11 +290,11 @@ h3,
       box-shadow 0.2s;
   }
   .input::placeholder {
-    color: #5f6590;
+    color: color-mix(in srgb, var(--color-muted) 75%, transparent);
   }
   .input:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgb(0 229 255 / 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
   }
 
   .btn {
@@ -206,9 +308,9 @@ h3,
     padding: 0.55rem 1rem;
     font-size: 0.875rem;
     font-weight: 600;
-    background: linear-gradient(120deg, #00e5ff, #6f7bff 70%, #8c5cff);
+    background: var(--btn);
     color: var(--color-on-accent);
-    box-shadow: 0 8px 24px -10px rgb(0 229 255 / 0.7);
+    box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--color-accent) 70%, transparent);
     transition:
       transform 0.15s,
       box-shadow 0.2s,
@@ -225,7 +327,7 @@ h3,
     transition: transform 0.6s var(--ease-out);
   }
   .btn:hover:not(:disabled) {
-    box-shadow: 0 10px 32px -8px rgb(0 229 255 / 0.85);
+    box-shadow: 0 10px 32px -8px color-mix(in srgb, var(--color-accent) 85%, transparent);
     transform: translateY(-1px);
   }
   .btn:hover:not(:disabled)::after {
@@ -239,7 +341,7 @@ h3,
     cursor: not-allowed;
   }
   .btn-ghost {
-    background: rgb(18 22 48 / 0.7);
+    background: var(--ghost);
     border: 1px solid var(--color-line);
     color: var(--color-ink);
     box-shadow: none;
@@ -248,11 +350,11 @@ h3,
     display: none;
   }
   .btn-ghost:hover:not(:disabled) {
-    border-color: rgb(0 229 255 / 0.6);
-    box-shadow: 0 0 20px -8px rgb(0 229 255 / 0.7);
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    box-shadow: 0 0 20px -8px color-mix(in srgb, var(--color-accent) 70%, transparent);
   }
 
-  /* Gradient text in the three accents, drifting slowly. */
+  /* Gradient text in the theme's accents, drifting slowly. */
   .neon-text {
     background: var(--neon);
     background-size: 200% 100%;
@@ -278,14 +380,33 @@ h3,
     height: 2px;
     border-radius: 2px;
     background: var(--neon);
-    box-shadow: 0 0 10px rgb(0 229 255 / 0.8);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 80%, transparent);
   }
 
   .skeleton {
     border-radius: 18px;
-    background: linear-gradient(90deg, #0c0f22 25%, #161b3a 50%, #0c0f22 75%);
+    background: linear-gradient(90deg, var(--skeleton-a) 25%, var(--skeleton-b) 50%, var(--skeleton-a) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
+  }
+
+  .hero-panel {
+    background: var(--hero);
+  }
+  [data-theme="light"] .hero-shade {
+    opacity: 0.35;
+  }
+  /* On the light theme's purple hero, white text and frosted tiles read better than neon. */
+  [data-theme="light"] .hero-panel .neon-text {
+    background-image: linear-gradient(110deg, #ffffff, #c7f3ff 50%, #ffd9f4);
+  }
+  [data-theme="light"] .hero-panel .tile {
+    background: rgb(255 255 255 / 0.12);
+    border-color: rgb(255 255 255 / 0.28);
+    box-shadow: 0 16px 40px -24px rgb(30 20 90 / 0.6);
+  }
+  [data-theme="light"] .hero-panel .text-muted {
+    color: rgb(255 255 255 / 0.8);
   }
 }
 
@@ -390,22 +511,23 @@ h3,
   }
 }
 
-input[type="range"] {
+input[type="range"],
+input[type="checkbox"] {
   accent-color: var(--color-accent);
 }
 
 .maplibregl-popup-content {
-  background: rgb(12 15 32 / 0.95) !important;
+  background: var(--popup) !important;
   color: var(--color-ink) !important;
-  border: 1px solid rgb(0 229 255 / 0.3);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
   border-radius: 12px !important;
   font-size: 12px;
   padding: 8px 10px !important;
-  box-shadow: 0 10px 30px -10px rgb(0 229 255 / 0.4) !important;
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--color-accent) 40%, transparent) !important;
 }
 .maplibregl-popup-tip {
-  border-top-color: rgb(12 15 32 / 0.95) !important;
-  border-bottom-color: rgb(12 15 32 / 0.95) !important;
+  border-top-color: var(--popup) !important;
+  border-bottom-color: var(--popup) !important;
 }
 
 /*
@@ -454,6 +576,9 @@ input[type="range"] {
 }
 .logo-glow {
   filter: drop-shadow(0 0 6px rgb(0 229 255 / 0.45)) drop-shadow(0 0 14px rgb(124 92 255 / 0.3));
+}
+[data-theme="light"] .logo-glow {
+  filter: drop-shadow(0 4px 10px rgb(79 70 229 / 0.3));
 }
 
 /* Hero network on the login screen. */

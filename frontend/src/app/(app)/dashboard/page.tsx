@@ -25,7 +25,7 @@ function Kpi({ label, value, hint, color, icon: Icon }: { label: string; value: 
         <span className="text-xs leading-snug text-muted">{label}</span>
         <span
           className="grid h-8 w-8 shrink-0 place-items-center rounded-xl"
-          style={{ color, background: `${color}1a`, boxShadow: `0 0 18px -6px ${color}` }}
+          style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)`, boxShadow: `0 0 18px -6px ${color}` }}
         >
           <Icon size={16} />
         </span>
@@ -73,11 +73,11 @@ function ScoreHero({ score, level, label, note }: { score: number; level: Level;
       </div>
       <div className="min-w-0">
         <div className="text-xs text-muted">City risk score</div>
-        <div className="font-display mt-1 text-2xl font-bold" style={{ color, textShadow: `0 0 20px ${color}88` }}>
+        <div className="font-display mt-1 text-2xl font-bold" style={{ color, textShadow: `0 0 20px color-mix(in srgb, ${color} 53%, transparent)` }}>
           {capitalize(level)}
         </div>
         <div className="mt-1 text-xs text-muted">{label}</div>
-        <div className="mt-2 inline-flex rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-muted">{note}</div>
+        <div className="mt-2 inline-flex rounded-full border border-ink/10 bg-ink/5 px-2 py-0.5 text-[10px] font-medium text-muted">{note}</div>
       </div>
     </div>
   );
@@ -104,7 +104,7 @@ function Playback() {
   };
 
   return (
-    <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/5 bg-bg/50 px-3 py-2.5">
+    <div className="mt-2 flex items-center gap-3 rounded-2xl border border-ink/8 bg-bg/50 px-3 py-2.5">
       <button onClick={start} className="btn !px-3 !py-1.5" aria-label={playing ? "Pause" : "Play the next 72 hours"}>
         {playing ? <Pause size={14} /> : <Play size={14} />}
         <span className="hidden sm:inline">{playing ? "Pause" : "Play 72 h"}</span>
@@ -137,7 +137,7 @@ function WeatherStrip({ weather }: { weather: Overview["weather"] }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map((item) => (
-        <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3">
+        <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-ink/8 bg-ink/[0.03] p-3">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent">
             <item.icon size={16} />
           </span>
@@ -179,16 +179,16 @@ function CommandCentre({ data }: { data: Overview }) {
           label={horizon === 0 ? "Next 24 hours" : `24 hours starting +${horizon} h`}
           note={data.city.data_mode === "demo" ? "Demo storm" : data.city.data_mode === "replay" ? `Replay · ${data.city.replay_date}` : "Live forecast"}
         />
-        <Kpi icon={AlertTriangle} label="Assets at risk" value={<CountUp value={atRisk} />} hint={`of ${data.assets.length} monitored`} color={atRisk ? "#ff3b6b" : "#2bff9e"} />
+        <Kpi icon={AlertTriangle} label="Assets at risk" value={<CountUp value={atRisk} />} hint={`of ${data.assets.length} monitored`} color={atRisk ? "var(--color-critical)" : "var(--color-low)"} />
         <Kpi
           icon={Hospital}
           label="Hospitals that may be cut off"
           value={<CountUp value={isolated.length} />}
           hint={isolated.length ? "every access route at high risk" : "access routes are open"}
-          color={isolated.length ? "#ff3b6b" : "#2bff9e"}
+          color={isolated.length ? "var(--color-critical)" : "var(--color-low)"}
         />
-        <Kpi icon={CloudRain} label="Rain, 24 hours" value={`${data.weather.rain24} mm`} hint={`${data.weather.antecedent} mm in the 3 days before`} color="#3ea8ff" />
-        <Kpi icon={Waves} label="River level" value={`${data.weather.river_ratio}×`} hint="of normal flow" color="#7c5cff" />
+        <Kpi icon={CloudRain} label="Rain, 24 hours" value={`${data.weather.rain24} mm`} hint={`${data.weather.antecedent} mm in the 3 days before`} color="var(--hz-flood)" />
+        <Kpi icon={Waves} label="River level" value={`${data.weather.river_ratio}×`} hint="of normal flow" color="var(--color-accent-2)" />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
@@ -215,7 +215,7 @@ function CommandCentre({ data }: { data: Overview }) {
                     <li key={a.id}>
                       <button
                         onClick={() => setSelected(a.id)}
-                        className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-white/[0.04]"
+                        className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-ink/[0.04]"
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium group-hover:text-accent">{a.name}</span>
@@ -281,7 +281,7 @@ function CommandCentre({ data }: { data: Overview }) {
         <Card title="Assets by risk level" className="xl:col-span-2">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {(["critical", "high", "moderate", "low"] as const).map((level) => (
-              <Stat key={level} color={LEVEL_COLOR[level]} label={capitalize(level)} value={<span style={{ color: LEVEL_COLOR[level], textShadow: `0 0 18px ${LEVEL_COLOR[level]}66` }}><CountUp value={data.counts[level]} /></span>} />
+              <Stat key={level} color={LEVEL_COLOR[level]} label={capitalize(level)} value={<span style={{ color: LEVEL_COLOR[level], textShadow: `0 0 18px color-mix(in srgb, ${LEVEL_COLOR[level]} 40%, transparent)` }}><CountUp value={data.counts[level]} /></span>} />
             ))}
           </div>
           <p className="mt-4 text-xs text-muted">
@@ -319,8 +319,8 @@ function CitizenHome({ data }: { data: Overview }) {
 
   return (
     <div className="stagger mx-auto max-w-3xl space-y-4">
-      <div className="card overflow-hidden p-6" style={{ borderColor: `${color}66`, boxShadow: `0 24px 60px -34px ${color}` }}>
-        <div className="pointer-events-none absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" style={{ background: `${color}2e` }} />
+      <div className="card overflow-hidden p-6" style={{ borderColor: `color-mix(in srgb, ${color} 40%, transparent)`, boxShadow: `0 24px 60px -34px ${color}` }}>
+        <div className="pointer-events-none absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" style={{ background: `color-mix(in srgb, ${color} 18%, transparent)` }} />
         <div className="relative flex items-center gap-5">
           <div className="relative grid h-20 w-20 shrink-0 place-items-center" style={{ color }}>
             <span className="halo" />
@@ -328,14 +328,14 @@ function CitizenHome({ data }: { data: Overview }) {
             <span className="halo" />
             <span
               className="h-12 w-12 rounded-full"
-              style={{ background: `radial-gradient(circle at 35% 30%, #ffffff, ${color} 45%, ${color}66)`, boxShadow: `0 0 34px ${color}` }}
+              style={{ background: `radial-gradient(circle at 35% 30%, #ffffff, ${color} 45%, color-mix(in srgb, ${color} 40%, transparent))`, boxShadow: `0 0 34px ${color}` }}
             />
           </div>
           <div className="min-w-0">
             <div className="text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">
               {t("yourCity")} · {data.city.name}
             </div>
-            <div className="font-display mt-1 text-4xl font-bold" style={{ color, textShadow: `0 0 26px ${color}88` }}>{t(status)}</div>
+            <div className="font-display mt-1 text-4xl font-bold" style={{ color, textShadow: `0 0 26px color-mix(in srgb, ${color} 53%, transparent)` }}>{t(status)}</div>
             <p className="mt-1 text-sm text-ink/90">{t(`${status}Msg` as TextKey)}</p>
           </div>
         </div>
@@ -356,7 +356,7 @@ function CitizenHome({ data }: { data: Overview }) {
         {list.length === 0 && !alerts.error && <Empty>{t("noAlerts")}</Empty>}
         <ul className="space-y-3">
           {list.slice(0, 3).map((a) => (
-            <li key={a.id} className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
+            <li key={a.id} className="rounded-2xl border border-ink/8 bg-ink/[0.03] p-3">
               <div className="text-sm font-medium">{a.title}</div>
               <div className="mt-0.5 line-clamp-3 text-xs text-muted">{a.message}</div>
               <a href={whatsappLink(a, data.city.name)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-xs text-low hover:underline">
@@ -370,9 +370,9 @@ function CitizenHome({ data }: { data: Overview }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card title={t("services")}>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <Stat color="#2bff9e" label={t("safe")} value={<span className="text-low"><CountUp value={data.counts.safe} /></span>} />
-            <Stat color="#ffd60a" label={t("caution")} value={<span className="text-moderate"><CountUp value={data.counts.caution} /></span>} />
-            <Stat color="#ff3b6b" label={t("danger")} value={<span className="text-critical"><CountUp value={data.counts.danger} /></span>} />
+            <Stat color="var(--color-low)" label={t("safe")} value={<span className="text-low"><CountUp value={data.counts.safe} /></span>} />
+            <Stat color="var(--color-moderate)" label={t("caution")} value={<span className="text-moderate"><CountUp value={data.counts.caution} /></span>} />
+            <Stat color="var(--color-critical)" label={t("danger")} value={<span className="text-critical"><CountUp value={data.counts.danger} /></span>} />
           </div>
         </Card>
         <Card title={t("emergency")}>

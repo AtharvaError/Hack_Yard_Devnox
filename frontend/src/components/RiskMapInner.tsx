@@ -3,6 +3,7 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
+import { resolveColor, useTheme } from "@/lib/theme";
 
 export type MapPoint = {
   id: number;
@@ -31,8 +32,8 @@ export type RiskMapProps = {
 
 const EMPTY: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 
-// OpenFreeMap: free vector basemap built from OpenStreetMap, no API key or usage limit.
-const BASE_STYLE = "https://tiles.openfreemap.org/styles/dark";
+// OpenFreeMap: free vector basemaps built from OpenStreetMap, no API key or usage limit.
+const BASE_STYLE = { dark: "https://tiles.openfreemap.org/styles/dark", light: "https://tiles.openfreemap.org/styles/positron" };
 
 function setData(map: maplibregl.Map, source: string, data: GeoJSON.GeoJSON) {
   (map.getSource(source) as maplibregl.GeoJSONSource | undefined)?.setData(data);
@@ -44,15 +45,17 @@ export default function RiskMapInner(props: RiskMapProps) {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const pinRef = useRef<maplibregl.Marker | null>(null);
   const [ready, setReady] = useState(false);
+  const theme = useTheme();
   // Latest callbacks, so map event handlers registered once never go stale.
   const handlers = useRef(props);
   handlers.current = props;
 
   useEffect(() => {
     if (!container.current) return;
+    // A theme change rebuilds the map on the matching basemap.
     const map = new maplibregl.Map({
       container: container.current,
-      style: BASE_STYLE,
+      style: BASE_STYLE[theme],
       center: handlers.current.center,
       zoom: 11.5,
     });
@@ -68,14 +71,14 @@ export default function RiskMapInner(props: RiskMapProps) {
         id: "links",
         type: "line",
         source: "links",
-        paint: { "line-color": "#7c5cff", "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [2, 2] },
+        paint: { "line-color": resolveColor("var(--color-accent-2)"), "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [2, 2] },
       });
       map.addLayer({
         id: "route",
         type: "line",
         source: "route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#00e5ff", "line-width": 5, "line-opacity": 0.95 },
+        paint: { "line-color": resolveColor("var(--color-accent)"), "line-width": 5, "line-opacity": 0.95 },
       });
       map.addLayer({
         id: "assets",
@@ -85,7 +88,7 @@ export default function RiskMapInner(props: RiskMapProps) {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 3.5, 13, 7, 16, 11],
           "circle-color": ["get", "color"],
           "circle-opacity": 0.92,
-          "circle-stroke-color": ["case", ["get", "ring"], "#ffffff", "#05060d"],
+          "circle-stroke-color": ["case", ["get", "ring"], theme === "light" ? "#101436" : "#ffffff", theme === "light" ? "#ffffff" : "#05060d"],
           "circle-stroke-width": ["case", ["get", "ring"], 2.5, 1],
         },
       });
@@ -117,10 +120,11 @@ export default function RiskMapInner(props: RiskMapProps) {
     });
 
     return () => {
+      setReady(false);
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     mapRef.current?.jumpTo({ center, zoom: 11.5 });
@@ -137,7 +141,7 @@ export default function RiskMapInner(props: RiskMapProps) {
         .map((p) => ({
           type: "Feature",
           geometry: { type: "Point", coordinates: [p.lon, p.lat] },
-          properties: { id: p.id, name: p.name, label: p.label, color: p.color, ring: !!p.ring },
+          properties: { id: p.id, name: p.name, label: p.label, color: resolveColor(p.color), ring: !!p.ring },
         })),
     });
   }, [ready, points]);
@@ -169,7 +173,7 @@ export default function RiskMapInner(props: RiskMapProps) {
     const map = mapRef.current;
     if (!ready || !map) return;
     pinRef.current?.remove();
-    pinRef.current = pin ? new maplibregl.Marker({ color: "#00e5ff" }).setLngLat(pin).addTo(map) : null;
+    pinRef.current = pin ? new maplibregl.Marker({ color: resolveColor("var(--color-accent)") }).setLngLat(pin).addTo(map) : null;
   }, [ready, pin]);
 
   useEffect(() => {

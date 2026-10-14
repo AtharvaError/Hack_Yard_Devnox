@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n";
 import { capitalize, timeAgo, whatsappLink } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
-const SEVERITY_COLOR = { advisory: "#3ea8ff", warning: "#ff8f1f", emergency: "#ff3b6b" };
+const SEVERITY_COLOR = { advisory: "var(--hz-flood)", warning: "var(--color-high)", emergency: "var(--color-critical)" };
 
 export default function AlertsPage() {
   const { city, isAdmin, notify } = useApp();
@@ -88,7 +88,7 @@ export default function AlertsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{a.title}</span>
-                    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color: SEVERITY_COLOR[a.severity], background: `${SEVERITY_COLOR[a.severity]}22` }}>
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color: SEVERITY_COLOR[a.severity], background: `color-mix(in srgb, ${SEVERITY_COLOR[a.severity]} 13%, transparent)` }}>
                       {capitalize(a.severity)}
                     </span>
                   </div>

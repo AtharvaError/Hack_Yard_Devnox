@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, type City, type Place } from "@/lib/api";
 import { LogoMark } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { LANGS, useLang } from "@/lib/i18n";
 import { HORIZONS } from "@/lib/labels";
 import { useApp } from "@/lib/store";
@@ -245,10 +246,12 @@ export function Topbar() {
         ))}
       </div>
 
+      <ThemeToggle />
+
       <Link
         href="/alerts"
         aria-label={`Alerts (${badges.alerts})`}
-        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-bg/60 text-muted transition-colors hover:border-accent/60 hover:text-accent"
+        className="relative hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-bg/60 text-muted transition-colors hover:border-accent/60 hover:text-accent sm:grid"
       >
         <Bell size={16} />
         {badges.alerts > 0 && (

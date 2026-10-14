@@ -93,7 +93,7 @@ function WhatIf({ budget, crews, onBudget }: { budget: string; crews: string; on
           onChange={(e) => setSlider(Number(e.target.value))}
           onPointerUp={() => slider !== null && onBudget(slider >= max ? "" : String(slider))}
           onKeyUp={() => slider !== null && onBudget(slider >= max ? "" : String(slider))}
-          className="min-w-40 flex-1 accent-[#00e5ff]"
+          className="min-w-40 flex-1 "
           aria-label="Budget in lakh rupees"
         />
         <span className="text-lg font-semibold tabular-nums">₹{Math.round(shown)} lakh</span>

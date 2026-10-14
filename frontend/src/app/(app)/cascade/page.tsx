@@ -11,13 +11,13 @@ import { TYPE_SINGULAR, capitalize, formatPeople } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
 const STATUS_COLOR: Record<string, string> = {
-  failed: "#ff3b6b",
-  isolated: "#ff3b6b",
-  "on backup power": "#ff8f1f",
-  degraded: "#ff8f1f",
-  "access reduced": "#ffd60a",
+  failed: "var(--color-critical)",
+  isolated: "var(--color-critical)",
+  "on backup power": "var(--color-high)",
+  degraded: "var(--color-high)",
+  "access reduced": "var(--color-moderate)",
 };
-const UNAFFECTED = "#2a3160";
+const UNAFFECTED = "var(--unaffected)";
 
 function CascadeView() {
   const { city, riskQuery, horizon, scenario, notify } = useApp();
@@ -54,7 +54,7 @@ function CascadeView() {
         name: a.name,
         lat: a.lat,
         lon: a.lon,
-        color: hit ? STATUS_COLOR[hit.status] ?? "#ff8f1f" : UNAFFECTED,
+        color: hit ? STATUS_COLOR[hit.status] ?? "var(--color-high)" : UNAFFECTED,
         label: hit ? `${TYPE_SINGULAR[a.type]} · ${capitalize(hit.status)}` : `${TYPE_SINGULAR[a.type]} · Unaffected`,
         ring: hit?.wave === 0,
       };
@@ -184,7 +184,7 @@ function CascadeView() {
                           <span className="truncate text-sm font-medium">{item.name}</span>
                           <span
                             className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium"
-                            style={{ color: STATUS_COLOR[item.status], background: `${STATUS_COLOR[item.status]}22` }}
+                            style={{ color: STATUS_COLOR[item.status], background: `color-mix(in srgb, ${STATUS_COLOR[item.status]} 13%, transparent)` }}
                           >
                             {capitalize(item.status)}
                           </span>

@@ -16,12 +16,12 @@ export function ZoneGrid() {
     <>
       <div className="grid grid-cols-3 gap-1.5">
         {data.map((zone) => {
-          const color = zone.assets ? LEVEL_COLOR[zone.level] : "#1e2445";
+          const color = zone.assets ? LEVEL_COLOR[zone.level] : "var(--color-line)";
           return (
             <div
               key={zone.name}
               className="rounded-lg border p-2 text-center"
-              style={{ borderColor: `${color}88`, background: `${color}1c` }}
+              style={{ borderColor: `color-mix(in srgb, ${color} 53%, transparent)`, background: `color-mix(in srgb, ${color} 11%, transparent)` }}
               title={zone.assets ? `${zone.at_risk} of ${zone.assets} assets at high or critical risk` : "No monitored assets here"}
             >
               <div className="truncate text-[11px] text-muted">{zone.name}</div>

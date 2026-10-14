@@ -32,8 +32,8 @@ function Content({ children }: { children: React.ReactNode }) {
             Fetching infrastructure from OpenStreetMap, terrain from the Copernicus elevation model and the live
             forecast. A new city usually takes 20 to 60 seconds; after that it opens instantly.
           </p>
-          <div className="mt-5 h-1 overflow-hidden rounded-full bg-white/5">
-            <div className="skeleton h-full !rounded-full !bg-[linear-gradient(90deg,transparent,#00e5ff,#ff3cac,transparent)]" />
+          <div className="mt-5 h-1 overflow-hidden rounded-full bg-ink/5">
+            <div className="skeleton h-full !rounded-full !bg-[linear-gradient(90deg,transparent,var(--color-accent),var(--color-accent-3),transparent)]" />
           </div>
         </div>
       </div>

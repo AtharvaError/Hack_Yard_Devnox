@@ -9,21 +9,21 @@ import type { CheckLabel, Report } from "@/lib/api";
 import { capitalize, timeAgo } from "@/lib/labels";
 import { SEVERITY_COLOR } from "./ReportForm";
 
-export const STATUS_COLOR = { pending: "#ffd60a", verified: "#2bff9e", rejected: "#8a90b8" };
+export const STATUS_COLOR = { pending: "var(--color-moderate)", verified: "var(--color-low)", rejected: "var(--color-muted)" };
 const STATUS_TEXT = { pending: "Under review", verified: "Verified", rejected: "Rejected" };
 
 const CHECK: Record<CheckLabel, { text: string; color: string; icon: LucideIcon }> = {
-  genuine: { text: "Likely genuine", color: "#2bff9e", icon: ShieldCheck },
-  review: { text: "Needs review", color: "#ffd60a", icon: ShieldAlert },
-  irrelevant: { text: "Likely irrelevant", color: "#ff3b6b", icon: ShieldX },
-  inappropriate: { text: "Inappropriate content", color: "#ff3b6b", icon: EyeOff },
-  unchecked: { text: "Not AI-checked", color: "#8a90b8", icon: CircleHelp },
-  pending: { text: "Checking photos…", color: "#00e5ff", icon: Loader2 },
+  genuine: { text: "Likely genuine", color: "var(--color-low)", icon: ShieldCheck },
+  review: { text: "Needs review", color: "var(--color-moderate)", icon: ShieldAlert },
+  irrelevant: { text: "Likely irrelevant", color: "var(--color-critical)", icon: ShieldX },
+  inappropriate: { text: "Inappropriate content", color: "var(--color-critical)", icon: EyeOff },
+  unchecked: { text: "Not AI-checked", color: "var(--color-muted)", icon: CircleHelp },
+  pending: { text: "Checking photos…", color: "var(--color-accent)", icon: Loader2 },
 };
 
 function Pill({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap" style={{ color, background: `${color}22` }}>
+    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap" style={{ color, background: `color-mix(in srgb, ${color} 13%, transparent)` }}>
       {children}
     </span>
   );

@@ -51,7 +51,7 @@ export function LevelBadge({ level }: { level: Level }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-      style={{ color, background: `${color}14`, borderColor: `${color}55`, boxShadow: `0 0 14px -6px ${color}` }}
+      style={{ color, background: `color-mix(in srgb, ${color} 8%, transparent)`, borderColor: `color-mix(in srgb, ${color} 33%, transparent)`, boxShadow: `0 0 14px -6px ${color}` }}
     >
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
       {capitalize(level)}
@@ -63,10 +63,10 @@ export function ScoreBar({ score, level }: { score: number; level: Level }) {
   const color = LEVEL_COLOR[level];
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/5">
+      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-ink/5">
         <div
           className="h-full rounded-full transition-[width] duration-700"
-          style={{ width: `${score}%`, background: `linear-gradient(90deg, ${color}66, ${color})`, boxShadow: `0 0 8px ${color}` }}
+          style={{ width: `${score}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 40%, transparent), ${color})`, boxShadow: `0 0 8px ${color}` }}
         />
       </div>
       <span className="w-8 text-right font-mono text-xs tabular-nums" style={{ color }}>
@@ -131,8 +131,8 @@ export function CountUp({ value, suffix = "" }: { value: number; suffix?: string
 export function Stat({ label, value, hint, color }: { label: string; value: React.ReactNode; hint?: string; color?: string }) {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] p-4"
-      style={color ? { borderColor: `${color}33`, boxShadow: `inset 0 -24px 40px -30px ${color}` } : undefined}
+      className="relative overflow-hidden rounded-2xl border border-ink/8 bg-ink/[0.03] p-4"
+      style={color ? { borderColor: `color-mix(in srgb, ${color} 20%, transparent)`, boxShadow: `inset 0 -24px 40px -30px ${color}` } : undefined}
     >
       {color && <span className="absolute inset-x-4 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />}
       <div className="text-xs text-muted">{label}</div>

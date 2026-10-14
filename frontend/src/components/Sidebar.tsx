@@ -130,7 +130,7 @@ export function Sidebar() {
                           </motion.span>
                         )}
                         {!active && (
-                          <span className="absolute inset-0 rounded-xl bg-white/[0.04] opacity-0 transition-opacity group-hover:opacity-100" />
+                          <span className="absolute inset-0 rounded-xl bg-ink/[0.04] opacity-0 transition-opacity group-hover:opacity-100" />
                         )}
                         <item.icon
                           size={17}
@@ -159,7 +159,7 @@ export function Sidebar() {
           <div className="mt-1.5 text-muted">{status.detail}</div>
         </div>
 
-        <div className="flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] p-2">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-ink/8 bg-ink/[0.03] p-2">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent to-accent-3 text-xs font-bold text-on-accent">
             {initials(user.name)}
           </span>

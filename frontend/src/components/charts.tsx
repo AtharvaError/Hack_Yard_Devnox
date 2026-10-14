@@ -11,7 +11,7 @@ const TOOLTIP_STYLE = {
   borderRadius: 12,
   boxShadow: "0 10px 30px -10px rgba(0, 229, 255, 0.4)",
   fontSize: 12,
-  color: "#eef1ff",
+  color: "var(--color-ink)",
 };
 
 /** Half-circle gauge for the city score (0-1000). */
@@ -22,7 +22,7 @@ export function Gauge({ score, level }: { score: number; level: Level }) {
   return (
     <div className="relative mx-auto w-[220px]">
       <svg viewBox="0 0 200 116" role="img" aria-label={`City risk score ${score} out of 1000, ${level}`}>
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#121630" strokeWidth="16" strokeLinecap="round" />
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--color-panel-2)" strokeWidth="16" strokeLinecap="round" />
         <path
           d="M 20 100 A 80 80 0 0 1 180 100"
           fill="none"
@@ -39,7 +39,7 @@ export function Gauge({ score, level }: { score: number; level: Level }) {
         <div className="font-display text-3xl leading-tight font-bold">
           <CountUp value={score} />
         </div>
-        <span className="mt-1 inline-block rounded-full px-3 py-0.5 text-xs font-semibold" style={{ background: color, color: "#05060d" }}>
+        <span className="mt-1 inline-block rounded-full px-3 py-0.5 text-xs font-semibold" style={{ background: color, color: "var(--color-bg)" }}>
           {capitalize(level)}
         </span>
       </div>
@@ -57,26 +57,26 @@ export function TrendChart({ data, horizon }: { data: { hour: number; score: num
       <AreaChart data={data} margin={{ top: 10, right: 10, left: -18, bottom: 0 }}>
         <defs>
           <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7c5cff" stopOpacity={0.5} />
-            <stop offset="60%" stopColor="#00e5ff" stopOpacity={0.12} />
-            <stop offset="100%" stopColor="#00e5ff" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--color-accent-2)" stopOpacity={0.5} />
+            <stop offset="60%" stopColor="var(--color-accent)" stopOpacity={0.12} />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="trendLine" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#00e5ff" />
-            <stop offset="55%" stopColor="#7c5cff" />
-            <stop offset="100%" stopColor="#ff3cac" />
+            <stop offset="0%" stopColor="var(--color-accent)" />
+            <stop offset="55%" stopColor="var(--color-accent-2)" />
+            <stop offset="100%" stopColor="var(--color-accent-3)" />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="#1e2445" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="var(--color-line)" strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="hour"
           tickFormatter={(h: number) => (h === 0 ? "Now" : `+${h}h`)}
-          tick={{ fill: "#8a90b8", fontSize: 11 }}
+          tick={{ fill: "var(--color-muted)", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         {/* Zoom in on calm days so the shape of the outlook is still readable. */}
-        <YAxis domain={[0, (max: number) => Math.min(1000, Math.max(100, Math.ceil((max * 1.3) / 50) * 50))]} tick={{ fill: "#8a90b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+        <YAxis domain={[0, (max: number) => Math.min(1000, Math.max(100, Math.ceil((max * 1.3) / 50) * 50))]} tick={{ fill: "var(--color-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
         <Tooltip
           contentStyle={TOOLTIP_STYLE}
           labelFormatter={(h) => (Number(h) === 0 ? "Next 24 h" : `24 h starting +${h}h`)}
@@ -92,7 +92,7 @@ export function TrendChart({ data, horizon }: { data: { hour: number; score: num
           isAnimationActive={false}
           dot={(props: { cx?: number; cy?: number; payload?: { hour: number }; index?: number }) =>
             props.payload?.hour === horizon ? (
-              <circle key={props.index} cx={props.cx} cy={props.cy} r={6} fill="#ff3cac" stroke="#fff" strokeWidth={2} style={{ filter: "drop-shadow(0 0 8px #ff3cac)" }} />
+              <circle key={props.index} cx={props.cx} cy={props.cy} r={6} fill="var(--color-accent-3)" stroke="#fff" strokeWidth={2} style={{ filter: "drop-shadow(0 0 8px var(--color-accent-3))" }} />
             ) : (
               <g key={props.index} />
             )
@@ -132,7 +132,7 @@ export function HazardDonut({ split }: { split: Record<Hazard, number> }) {
               style={{ filter: "drop-shadow(0 0 6px rgba(124, 92, 255, 0.45))" }}
             >
               {(active.length ? active : [null]).map((d, i) => (
-                <Cell key={i} fill={d ? HAZARD_COLOR[d.hazard] : "#121630"} />
+                <Cell key={i} fill={d ? HAZARD_COLOR[d.hazard] : "var(--color-panel-2)"} />
               ))}
             </Pie>
           </PieChart>

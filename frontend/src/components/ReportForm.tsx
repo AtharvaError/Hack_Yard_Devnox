@@ -8,9 +8,9 @@ import { preparePhoto, type PreparedPhoto } from "@/lib/photo";
 import { useApp } from "@/lib/store";
 
 export const SEVERITY_COLOR: Record<Severity, string> = {
-  minor: "#ffd60a",
-  serious: "#ff8f1f",
-  dangerous: "#ff3b6b",
+  minor: "var(--color-moderate)",
+  serious: "var(--color-high)",
+  dangerous: "var(--color-critical)",
 };
 
 const SEVERITY_HINT: Record<Severity, string> = {
@@ -147,7 +147,7 @@ export function ReportForm({
                 className="rounded-xl border px-2 py-2 text-left transition-colors"
                 style={{
                   borderColor: active ? SEVERITY_COLOR[level] : "var(--color-line)",
-                  background: active ? `${SEVERITY_COLOR[level]}1f` : "var(--color-panel-2)",
+                  background: active ? `color-mix(in srgb, ${SEVERITY_COLOR[level]} 12%, transparent)` : "var(--color-panel-2)",
                 }}
               >
                 <div className="text-sm font-medium" style={{ color: active ? SEVERITY_COLOR[level] : undefined }}>
