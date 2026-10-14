@@ -16,7 +16,7 @@ export function ZoneGrid() {
     <>
       <div className="grid grid-cols-3 gap-1.5">
         {data.map((zone) => {
-          const color = zone.assets ? LEVEL_COLOR[zone.level] : "#262a44";
+          const color = zone.assets ? LEVEL_COLOR[zone.level] : "#1e2445";
           return (
             <div
               key={zone.name}

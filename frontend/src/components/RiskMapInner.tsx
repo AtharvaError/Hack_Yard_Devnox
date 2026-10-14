@@ -68,14 +68,14 @@ export default function RiskMapInner(props: RiskMapProps) {
         id: "links",
         type: "line",
         source: "links",
-        paint: { "line-color": "#a855f7", "line-width": 1.5, "line-opacity": 0.7, "line-dasharray": [2, 2] },
+        paint: { "line-color": "#7c5cff", "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [2, 2] },
       });
       map.addLayer({
         id: "route",
         type: "line",
         source: "route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#60a5fa", "line-width": 5, "line-opacity": 0.9 },
+        paint: { "line-color": "#00e5ff", "line-width": 5, "line-opacity": 0.95 },
       });
       map.addLayer({
         id: "assets",
@@ -85,7 +85,7 @@ export default function RiskMapInner(props: RiskMapProps) {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 3.5, 13, 7, 16, 11],
           "circle-color": ["get", "color"],
           "circle-opacity": 0.92,
-          "circle-stroke-color": ["case", ["get", "ring"], "#ffffff", "#0b0d18"],
+          "circle-stroke-color": ["case", ["get", "ring"], "#ffffff", "#05060d"],
           "circle-stroke-width": ["case", ["get", "ring"], 2.5, 1],
         },
       });
@@ -169,7 +169,7 @@ export default function RiskMapInner(props: RiskMapProps) {
     const map = mapRef.current;
     if (!ready || !map) return;
     pinRef.current?.remove();
-    pinRef.current = pin ? new maplibregl.Marker({ color: "#a855f7" }).setLngLat(pin).addTo(map) : null;
+    pinRef.current = pin ? new maplibregl.Marker({ color: "#00e5ff" }).setLngLat(pin).addTo(map) : null;
   }, [ready, pin]);
 
   useEffect(() => {

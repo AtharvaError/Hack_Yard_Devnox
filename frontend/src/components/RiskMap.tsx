@@ -31,7 +31,7 @@ export function Legend({ levels }: { levels: (keyof typeof LEVEL_COLOR)[] }) {
     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
       {levels.map((level) => (
         <span key={level} className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ background: LEVEL_COLOR[level] }} />
+          <span className="h-2.5 w-2.5 rounded-full" style={{ background: LEVEL_COLOR[level], boxShadow: `0 0 8px ${LEVEL_COLOR[level]}` }} />
           {capitalize(level)}
         </span>
       ))}

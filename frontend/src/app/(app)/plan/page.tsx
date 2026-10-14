@@ -14,7 +14,7 @@ const STATUS_LABEL: Record<Task["status"], string> = { assigned: "Assigned", in_
 function ActionRow({ action, task, onAssign }: { action: PlanAction; task?: Task; onAssign?: (action: PlanAction) => void }) {
   return (
     <li className="flex gap-4 rounded-xl bg-panel-2 p-4">
-      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold ${action.rank ? "bg-accent text-white" : "bg-panel text-muted"}`}>
+      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold ${action.rank ? "bg-accent text-on-accent" : "bg-panel text-muted"}`}>
         {action.rank ?? "–"}
       </span>
       <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ function WhatIf({ budget, crews, onBudget }: { budget: string; crews: string; on
           onChange={(e) => setSlider(Number(e.target.value))}
           onPointerUp={() => slider !== null && onBudget(slider >= max ? "" : String(slider))}
           onKeyUp={() => slider !== null && onBudget(slider >= max ? "" : String(slider))}
-          className="min-w-40 flex-1 accent-[#a855f7]"
+          className="min-w-40 flex-1 accent-[#00e5ff]"
           aria-label="Budget in lakh rupees"
         />
         <span className="text-lg font-semibold tabular-nums">₹{Math.round(shown)} lakh</span>

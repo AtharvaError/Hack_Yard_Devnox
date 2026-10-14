@@ -13,7 +13,7 @@ function yesterday(): string {
   return new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 }
 
-const RELIEF_COLOR = "#60a5fa";
+const RELIEF_COLOR = "#3ea8ff";
 
 export default function MapPage() {
   const { city, isAdmin, riskQuery } = useApp();
@@ -85,7 +85,7 @@ export default function MapPage() {
             </div>
             <div className="mt-4 border-t border-line pt-4">
               <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="checkbox" checked={relief} onChange={(e) => setRelief(e.target.checked)} className="accent-[#60a5fa]" />
+                <input type="checkbox" checked={relief} onChange={(e) => setRelief(e.target.checked)} className="accent-[#3ea8ff]" />
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: RELIEF_COLOR }} />
                 Relief points {relief && places.data ? `(${places.data.length})` : ""}
               </label>
@@ -99,7 +99,7 @@ export default function MapPage() {
             </div>
             <div className="mt-4 border-t border-line pt-4">
               <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="checkbox" checked={satellite} onChange={(e) => setSatellite(e.target.checked)} className="accent-[#a855f7]" />
+                <input type="checkbox" checked={satellite} onChange={(e) => setSatellite(e.target.checked)} className="accent-[#00e5ff]" />
                 <Satellite size={15} className="text-accent" />
                 Satellite image (NASA)
               </label>

@@ -67,7 +67,7 @@ export function LinkImport({ onDone }: { onDone: () => void }) {
         </button>
         <input ref={input} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
         <label className="flex cursor-pointer items-center gap-2 text-sm">
-          <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} className="accent-[#a855f7]" />
+          <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} className="accent-[#00e5ff]" />
           Replace all existing links
         </label>
       </div>

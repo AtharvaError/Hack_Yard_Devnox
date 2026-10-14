@@ -107,7 +107,7 @@ export function AssetDetailPanel({ assetId, onClose }: { assetId: number; onClos
                         className="h-full rounded-full"
                         style={{
                           width: `${Math.min(f.points, 100)}%`,
-                          background: f.hazard === "reports" ? "#e8e9f3" : HAZARD_COLOR[f.hazard],
+                          background: f.hazard === "reports" ? "#eef1ff" : HAZARD_COLOR[f.hazard],
                         }}
                       />
                     </div>

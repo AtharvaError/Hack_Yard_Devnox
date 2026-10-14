@@ -9,16 +9,16 @@ import type { CheckLabel, Report } from "@/lib/api";
 import { capitalize, timeAgo } from "@/lib/labels";
 import { SEVERITY_COLOR } from "./ReportForm";
 
-export const STATUS_COLOR = { pending: "#fbbf24", verified: "#34d399", rejected: "#8b8fa8" };
+export const STATUS_COLOR = { pending: "#ffd60a", verified: "#2bff9e", rejected: "#8a90b8" };
 const STATUS_TEXT = { pending: "Under review", verified: "Verified", rejected: "Rejected" };
 
 const CHECK: Record<CheckLabel, { text: string; color: string; icon: LucideIcon }> = {
-  genuine: { text: "Likely genuine", color: "#34d399", icon: ShieldCheck },
-  review: { text: "Needs review", color: "#fbbf24", icon: ShieldAlert },
-  irrelevant: { text: "Likely irrelevant", color: "#f43f5e", icon: ShieldX },
-  inappropriate: { text: "Inappropriate content", color: "#f43f5e", icon: EyeOff },
-  unchecked: { text: "Not AI-checked", color: "#8b8fa8", icon: CircleHelp },
-  pending: { text: "Checking photos…", color: "#a855f7", icon: Loader2 },
+  genuine: { text: "Likely genuine", color: "#2bff9e", icon: ShieldCheck },
+  review: { text: "Needs review", color: "#ffd60a", icon: ShieldAlert },
+  irrelevant: { text: "Likely irrelevant", color: "#ff3b6b", icon: ShieldX },
+  inappropriate: { text: "Inappropriate content", color: "#ff3b6b", icon: EyeOff },
+  unchecked: { text: "Not AI-checked", color: "#8a90b8", icon: CircleHelp },
+  pending: { text: "Checking photos…", color: "#00e5ff", icon: Loader2 },
 };
 
 function Pill({ color, children }: { color: string; children: React.ReactNode }) {

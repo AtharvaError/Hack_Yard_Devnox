@@ -11,13 +11,13 @@ import { TYPE_SINGULAR, capitalize, formatPeople } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
 const STATUS_COLOR: Record<string, string> = {
-  failed: "#f43f5e",
-  isolated: "#f43f5e",
-  "on backup power": "#fb923c",
-  degraded: "#fb923c",
-  "access reduced": "#fbbf24",
+  failed: "#ff3b6b",
+  isolated: "#ff3b6b",
+  "on backup power": "#ff8f1f",
+  degraded: "#ff8f1f",
+  "access reduced": "#ffd60a",
 };
-const UNAFFECTED = "#3b4063";
+const UNAFFECTED = "#2a3160";
 
 function CascadeView() {
   const { city, riskQuery, horizon, scenario, notify } = useApp();
@@ -54,7 +54,7 @@ function CascadeView() {
         name: a.name,
         lat: a.lat,
         lon: a.lon,
-        color: hit ? STATUS_COLOR[hit.status] ?? "#fb923c" : UNAFFECTED,
+        color: hit ? STATUS_COLOR[hit.status] ?? "#ff8f1f" : UNAFFECTED,
         label: hit ? `${TYPE_SINGULAR[a.type]} · ${capitalize(hit.status)}` : `${TYPE_SINGULAR[a.type]} · Unaffected`,
         ring: hit?.wave === 0,
       };

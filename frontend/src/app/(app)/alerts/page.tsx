@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n";
 import { capitalize, timeAgo, whatsappLink } from "@/lib/labels";
 import { useApi, useApp } from "@/lib/store";
 
-const SEVERITY_COLOR = { advisory: "#60a5fa", warning: "#fb923c", emergency: "#f43f5e" };
+const SEVERITY_COLOR = { advisory: "#3ea8ff", warning: "#ff8f1f", emergency: "#ff3b6b" };
 
 export default function AlertsPage() {
   const { city, isAdmin, notify } = useApp();

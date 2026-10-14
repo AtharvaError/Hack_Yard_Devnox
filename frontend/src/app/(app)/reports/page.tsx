@@ -102,7 +102,7 @@ export default function ReportsPage() {
                     onClick={() => setFilter(f)}
                     aria-pressed={filter === f}
                     className={`flex-1 rounded-lg py-1.5 font-medium transition-colors ${
-                      filter === f ? "bg-accent text-white" : "text-muted hover:text-ink"
+                      filter === f ? "bg-accent text-on-accent" : "text-muted hover:text-ink"
                     }`}
                   >
                     {capitalize(f)} {count(f)}

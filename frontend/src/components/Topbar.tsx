@@ -64,7 +64,7 @@ export function CitySearch({ autoFocus = false }: { autoFocus?: boolean }) {
       />
       {searching && <Loader2 size={15} className="absolute top-1/2 right-3.5 -translate-y-1/2 animate-spin text-muted" />}
       {open && (results.length > 0 || (query.length < 2 && cities.length > 0)) && (
-        <ul className="card absolute top-full z-40 mt-2 max-h-80 w-full overflow-auto p-1.5 shadow-2xl">
+        <ul className="card absolute top-full z-40 mt-2 max-h-80 w-full overflow-auto !bg-panel/95 p-1.5 shadow-2xl">
           {query.length < 2 && <li className="px-3 py-1.5 text-[11px] tracking-wider text-muted uppercase">Loaded cities</li>}
           {query.length < 2
             ? cities.map((c) => (
@@ -132,7 +132,7 @@ function DataModePill() {
   const demo = city.data_mode === "demo";
   if (!demo && !isAdmin) return null;
 
-  const tone = demo ? "border-moderate/50 bg-moderate/10 text-moderate" : "border-line bg-panel text-muted hover:text-ink";
+  const tone = demo ? "border-moderate/50 bg-moderate/10 text-moderate" : "border-line bg-bg/60 text-muted hover:text-ink";
   const shape = "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium";
   const label = demo ? "Demo data" : "Use demo data";
   if (!isAdmin) {
@@ -175,7 +175,7 @@ function DataModePill() {
 function LangSwitch() {
   const { lang, setLang } = useLang();
   return (
-    <label className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-panel px-2 py-1 text-xs text-muted" title="Language of the citizen screens">
+    <label className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-bg/60 px-2 py-1 text-xs text-muted" title="Language of the citizen screens">
       <Languages size={14} />
       <select
         value={lang}
@@ -194,30 +194,25 @@ function LangSwitch() {
 }
 
 export function Topbar() {
-  const { user, isAdmin, city, horizon, setHorizon, scenario, setScenario, badges } = useApp();
+  const { isAdmin, city, horizon, setHorizon, scenario, setScenario, badges } = useApp();
 
   return (
-    <header className="no-print flex h-16 shrink-0 items-center gap-2 border-b border-line px-3 md:gap-4 md:px-6">
-      <Link href="/dashboard" aria-label="InfraSentinel home" className="md:hidden">
+    <header className="no-print card relative z-30 m-3 mb-0 flex min-h-16 shrink-0 flex-wrap items-center gap-2 !rounded-2xl px-3 py-2.5 md:flex-nowrap md:gap-4 md:px-5 md:py-0">
+      <Link href="/dashboard" aria-label="InfraSentinel home" className="mr-auto md:hidden">
         <LogoMark size={32} decorative />
       </Link>
-      <div className="hidden min-w-0 shrink-0 lg:block">
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          Welcome, {user.name}
-          <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${
-              isAdmin ? "bg-accent/20 text-accent" : "bg-low/15 text-low"
-            }`}
-          >
-            {isAdmin ? "Administrator" : "User"}
+      <div className="hidden max-w-64 min-w-0 shrink-0 lg:block">
+        <div className="text-[10px] font-semibold tracking-[0.16em] text-muted uppercase">{isAdmin ? "Watching" : "Your city"}</div>
+        <div className="flex min-w-0 items-baseline gap-2">
+          <span className="font-display flex shrink-0 items-center gap-1.5 text-base font-bold">
+            <MapPin size={15} className="self-center text-accent drop-shadow-[0_0_6px_var(--color-accent)]" />
+            {city ? city.name : "No city yet"}
           </span>
-        </div>
-        <div className="truncate text-xs text-muted">
-          {city ? `${city.name}${city.admin1 ? `, ${city.admin1}` : ""}, ${city.country}` : "Pick a city to begin"}
+          <span className="truncate text-xs text-muted">{city ? [city.admin1, city.country].filter(Boolean).join(", ") : "Pick a city to begin"}</span>
         </div>
       </div>
 
-      <div className="flex flex-1 justify-center">
+      <div className="order-last flex basis-full justify-center md:order-none md:flex-1 md:basis-auto">
         <CitySearch />
       </div>
 
@@ -235,14 +230,14 @@ export function Topbar() {
 
       <LangSwitch />
 
-      <div className="hidden shrink-0 rounded-full border border-line bg-panel p-0.5 sm:flex" role="group" aria-label="Forecast time">
+      <div className="hidden shrink-0 rounded-full border border-line bg-bg/60 p-0.5 sm:flex" role="group" aria-label="Forecast time">
         {HORIZONS.map((h) => (
           <button
             key={h.value}
             onClick={() => setHorizon(h.value)}
             aria-pressed={horizon === h.value}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              horizon === h.value ? "bg-accent text-white" : "text-muted hover:text-ink"
+              horizon === h.value ? "bg-accent text-on-accent shadow-[0_0_16px_-4px_var(--color-accent)]" : "text-muted hover:text-ink"
             }`}
           >
             {h.label}
@@ -253,11 +248,11 @@ export function Topbar() {
       <Link
         href="/alerts"
         aria-label={`Alerts (${badges.alerts})`}
-        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-panel text-muted transition-colors hover:text-ink"
+        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-bg/60 text-muted transition-colors hover:border-accent/60 hover:text-accent"
       >
         <Bell size={16} />
         {badges.alerts > 0 && (
-          <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-critical px-1 text-[10px] font-bold text-white">
+          <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-critical px-1 text-[10px] font-bold text-white shadow-[0_0_10px_var(--color-critical)]">
             {badges.alerts}
           </span>
         )}

@@ -31,7 +31,7 @@ export function MobileNav() {
   const t = useT();
 
   return (
-    <nav className="no-print flex shrink-0 border-t border-line bg-side md:hidden" aria-label="Main">
+    <nav className="no-print card mx-3 mb-3 flex shrink-0 !rounded-2xl p-1 md:hidden" aria-label="Main">
       {(isAdmin ? ADMIN_TABS : USER_TABS).map((tab) => {
         const active = pathname === tab.href;
         const count = tab.badge ? badges[tab.badge] : 0;
@@ -40,9 +40,11 @@ export function MobileNav() {
             key={tab.href}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2.5 text-[11px] ${active ? "text-accent" : "text-muted"}`}
+            className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] transition-colors ${
+              active ? "bg-accent/12 font-semibold text-accent" : "text-muted"
+            }`}
           >
-            <tab.icon size={20} />
+            <tab.icon size={20} className={active ? "drop-shadow-[0_0_6px_var(--color-accent)]" : ""} />
             <span className="max-w-full truncate">{tab.tk ? t(tab.tk) : tab.label}</span>
             {count > 0 && (
               <span className="absolute top-1.5 left-1/2 ml-2 rounded-full bg-critical px-1.5 text-[10px] font-bold text-white">{count}</span>

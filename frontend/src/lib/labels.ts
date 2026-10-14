@@ -1,13 +1,13 @@
 import type { AssetType, Hazard, Level } from "./api";
 
 export const LEVEL_COLOR: Record<Level, string> = {
-  low: "#34d399",
-  safe: "#34d399",
-  moderate: "#fbbf24",
-  caution: "#fbbf24",
-  high: "#fb923c",
-  critical: "#f43f5e",
-  danger: "#f43f5e",
+  low: "#2bff9e",
+  safe: "#2bff9e",
+  moderate: "#ffd60a",
+  caution: "#ffd60a",
+  high: "#ff8f1f",
+  critical: "#ff3b6b",
+  danger: "#ff3b6b",
 };
 
 export const TYPE_LABEL: Record<AssetType, string> = {
@@ -39,10 +39,10 @@ export const HAZARD_LABEL: Record<Hazard | "reports", string> = {
 };
 
 export const HAZARD_COLOR: Record<Hazard, string> = {
-  flood: "#60a5fa",
-  heat: "#f472b6",
-  landslide: "#a855f7",
-  wind: "#2dd4bf",
+  flood: "#3ea8ff",
+  heat: "#ff4fd8",
+  landslide: "#b06bff",
+  wind: "#22f0d0",
 };
 
 export const HORIZONS = [

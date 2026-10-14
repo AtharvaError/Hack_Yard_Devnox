@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPinned } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/Logo";
 import { MobileNav } from "@/components/MobileNav";
@@ -13,17 +13,28 @@ import { AppProvider, useApp } from "@/lib/store";
 
 function Content({ children }: { children: React.ReactNode }) {
   const { city, loadingCity } = useApp();
+  const pathname = usePathname();
 
   if (loadingCity) {
     return (
       <div className="grid h-full place-items-center">
-        <div className="card max-w-md p-8 text-center">
-          <LogoMark size={56} decorative className="mx-auto" />
-          <h2 className="mt-4 text-lg font-semibold">Building the risk model for {loadingCity}</h2>
+        <div className="card page-enter max-w-md p-8 text-center">
+          <div className="relative mx-auto grid h-24 w-24 place-items-center text-accent">
+            <span className="halo" />
+            <span className="halo" />
+            <span className="halo" />
+            <LogoMark size={64} decorative />
+          </div>
+          <h2 className="mt-5 text-xl font-bold">
+            Building the risk model for <span className="neon-text">{loadingCity}</span>
+          </h2>
           <p className="mt-2 text-sm text-muted">
             Fetching infrastructure from OpenStreetMap, terrain from the Copernicus elevation model and the live
             forecast. A new city usually takes 20 to 60 seconds; after that it opens instantly.
           </p>
+          <div className="mt-5 h-1 overflow-hidden rounded-full bg-white/5">
+            <div className="skeleton h-full !rounded-full !bg-[linear-gradient(90deg,transparent,#00e5ff,#ff3cac,transparent)]" />
+          </div>
         </div>
       </div>
     );
@@ -32,11 +43,11 @@ function Content({ children }: { children: React.ReactNode }) {
   if (!city) {
     return (
       <div className="grid h-full place-items-center">
-        <div className="card flex w-full max-w-lg flex-col items-center p-8 text-center">
-          <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent/15 text-accent">
-            <MapPinned size={24} />
+        <div className="card page-enter flex w-full max-w-lg flex-col items-center p-8 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl border border-accent/40 bg-accent/10 text-accent shadow-[0_0_30px_-8px_var(--color-accent)]">
+            <MapPinned size={26} />
           </span>
-          <h2 className="mt-4 text-lg font-semibold">Choose a city to analyse</h2>
+          <h2 className="mt-4 text-xl font-bold">Choose a city to analyse</h2>
           <p className="mt-2 mb-5 text-sm text-muted">
             Type any city in the world. InfraSentinel pulls its hospitals, roads, bridges, power and water assets and
             scores them against the live weather forecast.
@@ -47,7 +58,11 @@ function Content({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div key={pathname} className="page-enter">
+      {children}
+    </div>
+  );
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -84,7 +99,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) {
     return (
       <div className="grid h-screen place-items-center">
-        <LogoMark size={64} />
+        <div className="relative grid h-28 w-28 place-items-center text-accent">
+          <span className="halo" />
+          <span className="halo" />
+          <LogoMark size={72} />
+        </div>
       </div>
     );
   }
@@ -96,7 +115,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Sidebar />
           <div className="flex min-w-0 flex-1 flex-col">
             <Topbar />
-            <main className="min-h-0 flex-1 overflow-y-auto p-3 md:p-6">
+            <main className="min-h-0 flex-1 overflow-y-auto p-3 md:p-5 md:pt-5">
               <Content>{children}</Content>
             </main>
             <MobileNav />

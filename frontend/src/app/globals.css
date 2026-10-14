@@ -1,109 +1,334 @@
 @import "tailwindcss";
+/* Scan the source explicitly so classes are found wherever the app is run from. */
+@source "../";
 
+/*
+ * InfraSentinel "Neon Pulse" theme: a near-black navy base, glass panels, and three neon accents
+ * (cyan, violet, magenta). The risk colours stay distinct from the accents so meaning never blurs.
+ */
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
+  --font-mono: var(--font-code);
 
-  --color-bg: #0b0d18;
-  --color-side: #0f1120;
-  --color-panel: #151829;
-  --color-panel-2: #1c2036;
-  --color-line: #262a44;
-  --color-ink: #e8e9f3;
-  --color-muted: #8b8fa8;
-  --color-accent: #a855f7;
-  --color-accent-2: #7c3aed;
+  --color-bg: #05060d;
+  --color-side: #080a16;
+  --color-panel: #0c0f20;
+  --color-panel-2: #121630;
+  --color-line: #1e2445;
+  --color-ink: #eef1ff;
+  --color-muted: #8a90b8;
+  --color-accent: #00e5ff;
+  --color-accent-2: #7c5cff;
+  --color-accent-3: #ff3cac;
+  --color-on-accent: #02131a;
 
-  --color-low: #34d399;
-  --color-moderate: #fbbf24;
-  --color-high: #fb923c;
-  --color-critical: #f43f5e;
+  --color-low: #2bff9e;
+  --color-moderate: #ffd60a;
+  --color-high: #ff8f1f;
+  --color-critical: #ff3b6b;
 }
 
+:root {
+  --neon: linear-gradient(110deg, #00e5ff 0%, #7c5cff 50%, #ff3cac 100%);
+  --glass: linear-gradient(180deg, rgb(20 25 54 / 0.72), rgb(10 12 28 / 0.78));
+  --glass-line: rgb(122 140 255 / 0.13);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  background: var(--color-bg);
+}
 html,
 body {
   height: 100%;
 }
 
 body {
-  background: var(--color-bg);
+  position: relative;
   color: var(--color-ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
-/* Thin scrollbars that match the dark panels. */
+/* Slow-moving aurora behind everything, plus a faint engineering grid that fades towards the edges. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  inset: -20%;
+  background:
+    radial-gradient(38% 32% at 18% 12%, rgb(0 229 255 / 0.13), transparent 70%),
+    radial-gradient(34% 30% at 85% 18%, rgb(124 92 255 / 0.16), transparent 70%),
+    radial-gradient(40% 36% at 70% 92%, rgb(255 60 172 / 0.1), transparent 70%);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+body::after {
+  background-image:
+    linear-gradient(rgb(122 140 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(122 140 255 / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 85%);
+}
+@keyframes aurora {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) rotate(4deg) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-3%, 2%, 0) rotate(-3deg) scale(1.02);
+  }
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgb(0 229 255 / 0.3);
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2e3352 transparent;
+  scrollbar-color: #262d58 transparent;
 }
 
-.card {
-  background: var(--color-panel);
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.card-hover:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-  box-shadow: 0 0 24px -8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
-.input {
-  width: 100%;
-  background: var(--color-panel-2);
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--color-ink);
-  outline: none;
-}
-.input:focus {
-  border-color: var(--color-accent);
+@layer components {
+  /* Glass panel with a hairline highlight along the top edge. */
+  .card {
+    position: relative;
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    border-radius: 20px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 18px 40px -24px rgb(0 0 0 / 0.9);
+    backdrop-filter: blur(14px);
+    transition:
+      border-color 0.25s,
+      box-shadow 0.25s,
+      transform 0.25s var(--ease-out);
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.55), rgb(255 60 172 / 0.45), transparent);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card-hover:hover {
+    border-color: rgb(0 229 255 / 0.45);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.05),
+      0 0 0 1px rgb(0 229 255 / 0.12),
+      0 20px 50px -20px rgb(0 229 255 / 0.35);
+    transform: translateY(-2px);
+  }
+
+  /* A panel whose border glows in its own colour, set with --tone. */
+  .tile {
+    --tone: var(--color-accent);
+    position: relative;
+    overflow: hidden;
+    background: var(--glass);
+    border: 1px solid color-mix(in srgb, var(--tone) 28%, transparent);
+    border-radius: 18px;
+    box-shadow: 0 16px 40px -26px color-mix(in srgb, var(--tone) 80%, transparent);
+    backdrop-filter: blur(14px);
+    transition:
+      transform 0.25s var(--ease-out),
+      box-shadow 0.25s;
+  }
+  .tile::after {
+    content: "";
+    position: absolute;
+    right: -30%;
+    top: -60%;
+    width: 80%;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--tone) 22%, transparent), transparent 65%);
+    pointer-events: none;
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 50px -22px color-mix(in srgb, var(--tone) 95%, transparent);
+  }
+
+  .input {
+    width: 100%;
+    background: rgb(8 10 24 / 0.7);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    outline: none;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .input::placeholder {
+    color: #5f6590;
+  }
+  .input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgb(0 229 255 / 0.15);
+  }
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    overflow: hidden;
+    border-radius: 12px;
+    padding: 0.55rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: linear-gradient(120deg, #00e5ff, #6f7bff 70%, #8c5cff);
+    color: var(--color-on-accent);
+    box-shadow: 0 8px 24px -10px rgb(0 229 255 / 0.7);
+    transition:
+      transform 0.15s,
+      box-shadow 0.2s,
+      filter 0.2s;
+    cursor: pointer;
+  }
+  /* Light glint that crosses the button on hover. */
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.6s var(--ease-out);
+  }
+  .btn:hover:not(:disabled) {
+    box-shadow: 0 10px 32px -8px rgb(0 229 255 / 0.85);
+    transform: translateY(-1px);
+  }
+  .btn:hover:not(:disabled)::after {
+    transform: translateX(120%);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    background: rgb(18 22 48 / 0.7);
+    border: 1px solid var(--color-line);
+    color: var(--color-ink);
+    box-shadow: none;
+  }
+  .btn-ghost::after {
+    display: none;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: rgb(0 229 255 / 0.6);
+    box-shadow: 0 0 20px -8px rgb(0 229 255 / 0.7);
+  }
+
+  /* Gradient text in the three accents, drifting slowly. */
+  .neon-text {
+    background: var(--neon);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: neon-drift 8s ease-in-out infinite alternate;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--neon);
+    box-shadow: 0 0 10px rgb(0 229 255 / 0.8);
+  }
+
+  .skeleton {
+    border-radius: 18px;
+    background: linear-gradient(90deg, #0c0f22 25%, #161b3a 50%, #0c0f22 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  border-radius: 10px;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background: var(--color-accent);
-  color: white;
-  transition: filter 0.15s, box-shadow 0.2s;
-  cursor: pointer;
-}
-.btn:hover:not(:disabled) {
-  filter: brightness(1.12);
-  box-shadow: 0 0 18px -4px var(--color-accent);
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.btn-ghost {
-  background: var(--color-panel-2);
-  border: 1px solid var(--color-line);
-  color: var(--color-ink);
-}
-.btn-ghost:hover:not(:disabled) {
-  box-shadow: none;
-  border-color: var(--color-accent);
-}
-
-.skeleton {
-  border-radius: 12px;
-  background: linear-gradient(90deg, #171a2d 25%, #20243d 50%, #171a2d 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+@keyframes neon-drift {
+  to {
+    background-position: 100% 0;
+  }
 }
 @keyframes shimmer {
   to {
     background-position: -200% 0;
   }
+}
+
+/* Cards on a screen rise into place one after another. "backwards" so no transform lingers afterwards
+   (a lingering one would trap fixed-position dialogs inside the card). */
+.stagger > * {
+  animation: rise 0.6s var(--ease-out) backwards;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.stagger > *:nth-child(n + 6) {
+  animation-delay: 0.25s;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.page-enter {
+  animation: rise 0.5s var(--ease-out) backwards;
 }
 
 .live-dot {
@@ -112,6 +337,7 @@ body {
   height: 8px;
   border-radius: 999px;
   background: var(--color-low);
+  box-shadow: 0 0 10px var(--color-low);
 }
 .live-dot::after {
   content: "";
@@ -123,6 +349,7 @@ body {
 }
 .live-dot.off {
   background: var(--color-muted);
+  box-shadow: none;
 }
 .live-dot.off::after {
   display: none;
@@ -138,60 +365,137 @@ body {
   }
 }
 
-.maplibregl-popup-content {
-  background: var(--color-panel-2) !important;
-  color: var(--color-ink) !important;
-  border: 1px solid var(--color-line);
-  border-radius: 10px !important;
-  font-size: 12px;
-  padding: 8px 10px !important;
+/* Expanding rings around a status orb. */
+.halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  animation: halo 2.6s ease-out infinite;
 }
-.maplibregl-popup-tip {
-  border-top-color: var(--color-panel-2) !important;
-  border-bottom-color: var(--color-panel-2) !important;
+.halo:nth-child(2) {
+  animation-delay: 0.85s;
+}
+.halo:nth-child(3) {
+  animation-delay: 1.7s;
+}
+@keyframes halo {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
 }
 
-/* Logo: a radar sweep turns once every 4 s, each asset blips as it passes, the at-risk asset pulses. */
-.logo-sweep {
-  transform-box: view-box;
-  transform-origin: 32px 33px;
-  animation: logo-sweep 4s linear infinite;
+input[type="range"] {
+  accent-color: var(--color-accent);
 }
-@keyframes logo-sweep {
+
+.maplibregl-popup-content {
+  background: rgb(12 15 32 / 0.95) !important;
+  color: var(--color-ink) !important;
+  border: 1px solid rgb(0 229 255 / 0.3);
+  border-radius: 12px !important;
+  font-size: 12px;
+  padding: 8px 10px !important;
+  box-shadow: 0 10px 30px -10px rgb(0 229 255 / 0.4) !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: rgb(12 15 32 / 0.95) !important;
+  border-bottom-color: rgb(12 15 32 / 0.95) !important;
+}
+
+/*
+ * Logo: a spark runs along the pulse line (the live signal), another traces the hexagon (the city's
+ * infrastructure), and the spike at the top pulses (a risk being caught).
+ */
+.logo-spark {
+  stroke-dasharray: 12 88;
+  animation: logo-spark 2.4s cubic-bezier(0.55, 0.1, 0.35, 0.95) infinite;
+}
+@keyframes logo-spark {
+  from {
+    stroke-dashoffset: 12;
+  }
   to {
-    transform: rotate(360deg);
+    stroke-dashoffset: -100;
   }
 }
-.logo-blip {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: logo-blip 4s linear infinite;
+.logo-trace {
+  stroke-dasharray: 9 91;
+  animation: logo-trace 5s linear infinite;
 }
-@keyframes logo-blip {
-  0% {
-    opacity: 0.55;
-    transform: scale(2.1);
-  }
-  22%,
-  100% {
-    opacity: 0;
-    transform: scale(1);
+@keyframes logo-trace {
+  to {
+    stroke-dashoffset: -100;
   }
 }
 .logo-pulse {
   transform-box: fill-box;
   transform-origin: center;
-  animation: logo-pulse 2s ease-out infinite;
+  animation: logo-pulse 2.4s ease-out infinite;
 }
 @keyframes logo-pulse {
-  0% {
-    opacity: 0.85;
+  0%,
+  35% {
+    opacity: 0;
     transform: scale(1);
+  }
+  40% {
+    opacity: 0.9;
   }
   100% {
     opacity: 0;
-    transform: scale(3.3);
+    transform: scale(3.2);
+  }
+}
+.logo-glow {
+  filter: drop-shadow(0 0 6px rgb(0 229 255 / 0.45)) drop-shadow(0 0 14px rgb(124 92 255 / 0.3));
+}
+
+/* Hero network on the login screen. */
+.net-flow {
+  stroke-dasharray: 4 10;
+  animation: net-flow 1.6s linear infinite;
+}
+@keyframes net-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+.net-scan {
+  left: -10rem;
+  animation: net-scan 7s ease-in-out infinite;
+}
+@keyframes net-scan {
+  0%,
+  100% {
+    left: -10rem;
+  }
+  50% {
+    left: 100%;
+  }
+}
+.net-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: net-node 3s ease-in-out infinite;
+}
+@keyframes net-node {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.7;
+  }
+}
+.float-y {
+  animation: float-y 6s ease-in-out infinite;
+}
+@keyframes float-y {
+  50% {
+    transform: translateY(-8px);
   }
 }
 
@@ -211,6 +515,14 @@ body {
   body {
     background: white;
     color: black;
+  }
+  body::before,
+  body::after {
+    display: none;
+  }
+  .card {
+    backdrop-filter: none;
+    box-shadow: none;
   }
   .print-area {
     border: none !important;

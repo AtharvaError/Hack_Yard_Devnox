@@ -8,9 +8,9 @@ import { preparePhoto, type PreparedPhoto } from "@/lib/photo";
 import { useApp } from "@/lib/store";
 
 export const SEVERITY_COLOR: Record<Severity, string> = {
-  minor: "#fbbf24",
-  serious: "#fb923c",
-  dangerous: "#f43f5e",
+  minor: "#ffd60a",
+  serious: "#ff8f1f",
+  dangerous: "#ff3b6b",
 };
 
 const SEVERITY_HINT: Record<Severity, string> = {
