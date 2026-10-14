@@ -1,8 +1,15 @@
-"""Plain-language situation brief. Uses Gemini's free tier if a key is set, otherwise a template."""
+"""Plain-language situation brief and public advisory.
+
+The facts always come from the risk model through a fixed template. If an AI key is set, the AI rewrites
+that template in plain language (and, for citizens, in their language) without adding facts.
+"""
 
 import httpx
 
 from .. import config
+from . import vision
+
+LANG_NAMES = {"en": "English", "hi": "Hindi", "mr": "Marathi", "ml": "Malayalam"}
 
 HAZARD_WORDS = {"flood": "flooding", "heat": "extreme heat", "landslide": "landslides", "wind": "high winds"}
 TYPE_PLURAL = {
@@ -119,8 +126,21 @@ def _gemini(prompt: str) -> str | None:
         return None
 
 
+def _ai(prompt: str) -> tuple[str, str] | None:
+    """Gemini's own API if only a Gemini key is set, otherwise the provider configured for photo checks."""
+    if config.GEMINI_API_KEY and not config.VISION_API_KEY:
+        text = _gemini(prompt)
+        return (text, f"Gemini {config.GEMINI_MODEL}") if text else None
+    answer = vision.write_text(prompt)
+    if not answer:
+        return None
+    cfg = vision.settings()
+    return answer[0], f"{cfg['name'] if cfg else 'AI'} · {answer[1]}"
+
+
 def make_brief(
-    city_name: str, horizon: int, scenario_name: str | None, overview: dict, plan: dict | None, public: bool
+    city_name: str, horizon: int, scenario_name: str | None, overview: dict, plan: dict | None, public: bool,
+    lang: str = "en",
 ) -> dict:
     facts = _facts(city_name, horizon, scenario_name, overview, plan)
     template = _template_public(facts) if public else _template_admin(facts)
@@ -129,10 +149,14 @@ def make_brief(
         if public
         else "city disaster-management officials, concise and action-oriented"
     )
+    language = LANG_NAMES.get(lang, "English")
     prompt = (
         f"Rewrite this infrastructure risk summary as a short brief for {audience}. "
-        "Use only the facts given; do not invent numbers, names or places. Plain text, no markdown.\n\n"
+        f"Write it in {language}. Keep asset names and numbers exactly as given. "
+        "Use only the facts given; do not invent numbers, names, places or advice. Plain text, no markdown.\n\n"
         + template
     )
-    ai_text = _gemini(prompt)
-    return {"text": ai_text or template, "source": "gemini" if ai_text else "template"}
+    answer = _ai(prompt)
+    if answer:
+        return {"text": answer[0], "source": "ai", "ai_name": answer[1], "lang": lang}
+    return {"text": template, "source": "template", "ai_name": None, "lang": "en"}

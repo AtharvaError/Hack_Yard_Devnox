@@ -336,10 +336,13 @@ def brief(
     city_id: int,
     horizon: int = 0,
     scenario: str | None = None,
+    lang: str = "en",
     user: User = Depends(current_user),
     db: Session = Depends(get_db),
 ):
     scenario = _check(horizon, scenario)
+    if lang not in brief_service.LANG_NAMES:
+        raise HTTPException(400, "Unknown language")
     is_admin = user.role == "admin"
     if not is_admin:
         scenario = None
@@ -351,7 +354,7 @@ def brief(
         served = cascade_service.served_population(city, data["_raw_assets"])
         plan_data = plan_service.build_plan(data["assets"], graph, served, None, None)
     scenario_name = risk.SCENARIOS[scenario]["name"] if scenario else None
-    result = brief_service.make_brief(city.name, horizon, scenario_name, data, plan_data, public=not is_admin)
+    result = brief_service.make_brief(city.name, horizon, scenario_name, data, plan_data, public=not is_admin, lang=lang)
     return {**result, "generated_at": utcnow().isoformat(), "city": city.name}
 
 

@@ -221,6 +221,40 @@ def check(cfg: dict, images: list[bytes], damage_type: str, severity: str) -> di
     return {"ok": False, "error": last_error}
 
 
+def write_text(prompt: str) -> tuple[str, str] | None:
+    """Plain text from the configured AI provider, as (text, model), or None if none is set or it fails.
+
+    Used for the situation brief and public advisory. It goes through the same provider and model
+    discovery as the photo check, so one free key covers both.
+    """
+    cfg = settings()
+    if not cfg:
+        return None
+    messages = [{"role": "user", "content": prompt}]
+    for model in _candidates(cfg):
+        try:
+            res = _http.post(
+                f"{cfg['base']}/chat/completions",
+                headers={"Authorization": f"Bearer {cfg['key']}"},
+                json={"model": model, "messages": messages, "temperature": 0.3},
+            )
+        except httpx.HTTPError:
+            return None
+        if res.status_code in (401, 403, 429) or res.status_code >= 500:
+            return None
+        if res.status_code != 200:
+            continue
+        try:
+            text = res.json()["choices"][0]["message"]["content"] or ""
+        except (KeyError, IndexError, ValueError):
+            continue
+        # Some models think out loud first; only the answer is wanted.
+        text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+        if text:
+            return text, model
+    return None
+
+
 def decide(verdict: dict, flags: list[dict]) -> tuple[str, str]:
     """Turns the model's answer and the basic-check flags into a label and a reason for the administrator."""
     reason = verdict["reason"] or "No description given."

@@ -118,7 +118,7 @@ Settings shows which one is active. With a key set, report photos are sent to th
 
 ## Optional
 
-- `GEMINI_API_KEY` in `backend/.env` makes the brief AI-written (free tier). Without it a built-in template is used.
+- With an AI key set (`VISION_API_KEY`, or `GEMINI_API_KEY` alone), the AI also rewrites the situation brief in plain language and writes the public advisory in the citizen's chosen language (English, Hindi, Marathi or Malayalam). The facts always come from the risk model; without a key the built-in template is used.
 - `CITY_RADIUS_KM` (default 7, maximum 15) sets how far around the city centre is analysed.
 
 ## Deploying
