@@ -1,4 +1,5 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -46,8 +47,8 @@ async def refresh_loop() -> None:
         await asyncio.sleep(60)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+def prepare_database() -> None:
+    """Creates the tables and the demo accounts and cities. Safe to run more than once."""
     Base.metadata.create_all(engine)
     add_missing_columns()
     config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -55,6 +56,16 @@ async def lifespan(app: FastAPI):
     with SessionLocal() as db:
         demo.seed(db)
     photos.reset_interrupted_checks()
+
+
+# Serverless hosts may not run the lifespan hook, so prepare the database as soon as the code loads.
+if os.getenv("VERCEL"):
+    prepare_database()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    prepare_database()
     task = asyncio.create_task(refresh_loop())
     yield
     task.cancel()

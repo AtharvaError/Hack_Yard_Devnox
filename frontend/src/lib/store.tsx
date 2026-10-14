@@ -34,6 +34,9 @@ const API_PORT = process.env.NEXT_PUBLIC_API_PORT ?? "8000";
 const AppContext = createContext<AppState | null>(null);
 const CITY_KEY = "hackyard.city";
 
+// NEXT_PUBLIC_WS_URL="poll" replaces the live channel with a refresh every minute.
+const POLL = process.env.NEXT_PUBLIC_WS_URL === "poll";
+
 export function useApp(): AppState {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useApp must be used inside AppProvider");
@@ -48,7 +51,7 @@ export function AppProvider({ user, children }: { user: User; children: React.Re
   const [horizon, setHorizon] = useState(0);
   const [scenario, setScenario] = useState<string | null>(null);
   const [liveVersion, setLiveVersion] = useState(0);
-  const [live, setLive] = useState(false);
+  const [live, setLive] = useState(POLL);
   const [badges, setBadges] = useState({ alerts: 0, pendingReports: 0 });
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastId = useRef(0);
@@ -98,6 +101,11 @@ export function AppProvider({ user, children }: { user: User; children: React.Re
 
   // Live channel: the server only says "something changed"; data comes through the authenticated API.
   useEffect(() => {
+    if (POLL) {
+      // Hosts without WebSockets (Vercel functions): ask for fresh data every minute instead.
+      const timer = setInterval(() => setLiveVersion((v) => v + 1), 60_000);
+      return () => clearInterval(timer);
+    }
     let socket: WebSocket | null = null;
     let retry: ReturnType<typeof setTimeout>;
     let closed = false;

@@ -18,6 +18,10 @@ def _load_env_file() -> None:
 
 _load_env_file()
 
+# On Vercel the code is read-only and only /tmp can be written, so the database and photos live there.
+# They last only as long as one server instance; the demo accounts and cities are recreated on start.
+WRITABLE_DIR = Path("/tmp") if os.getenv("VERCEL") else BASE_DIR
+
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-only-secret-change-me")
 JWT_HOURS = 12
 COOKIE_NAME = "hy_session"
@@ -33,7 +37,7 @@ DEMO_USER_PASSWORD = os.getenv("DEMO_USER_PASSWORD", "User@12345")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{(BASE_DIR / 'hackyard.db').as_posix()}")
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{(WRITABLE_DIR / 'hackyard.db').as_posix()}")
 
 CITY_RADIUS_KM = min(float(os.getenv("CITY_RADIUS_KM", "7")), 15.0)
 REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", "15"))
@@ -41,7 +45,7 @@ REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", "15"))
 USER_AGENT = "InfraSentinel/0.1 (hackathon prototype; localhost)"
 
 # Citizen report photos.
-UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads")))
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(WRITABLE_DIR / "uploads")))
 MAX_PHOTOS = 3
 MAX_PHOTO_BYTES = 5 * 1024 * 1024
 REPORTS_PER_DAY = int(os.getenv("REPORTS_PER_DAY", "10"))
