@@ -406,8 +406,45 @@ h3,
     box-shadow: 0 16px 40px -24px rgb(30 20 90 / 0.6);
   }
   [data-theme="light"] .hero-panel .text-muted {
-    color: rgb(255 255 255 / 0.8);
+    color: rgb(255 255 255 / 0.86) !important;
   }
+}
+
+/*
+ * The landing (sign-in) page has its own palette: teal, sky blue and lime, on deep teal-navy in the
+ * dark theme and a teal-to-blue gradient in the light theme. The hero's inner dark scope gets it too.
+ */
+.landing,
+.landing [data-theme="dark"] {
+  --color-accent: #2dd4bf;
+  --color-accent-2: #38bdf8;
+  --color-accent-3: #a3e635;
+  --color-on-accent: #03201b;
+  --neon: linear-gradient(110deg, #2dd4bf 0%, #38bdf8 55%, #a3e635 100%);
+  --btn: linear-gradient(120deg, #2dd4bf, #22b8e6 60%, #38bdf8);
+  --hero: linear-gradient(140deg, #04212a 0%, #061826 50%, #0a1d33 100%);
+}
+.landing {
+  background:
+    radial-gradient(50% 45% at 85% 10%, rgb(56 189 248 / 0.12), transparent 70%),
+    radial-gradient(45% 40% at 70% 95%, rgb(45 212 191 / 0.12), transparent 70%),
+    #040b12;
+}
+[data-theme="light"] .landing {
+  --color-accent: #0d9488;
+  --color-accent-2: #0284c7;
+  --color-accent-3: #2563eb;
+  --color-on-accent: #ffffff;
+  --neon: linear-gradient(110deg, #0d9488 0%, #0284c7 55%, #2563eb 100%);
+  --btn: linear-gradient(120deg, #0d9488, #0891b2 55%, #0284c7);
+  --hero: linear-gradient(140deg, #0f766e 0%, #0891b2 50%, #1d4ed8 100%);
+  background:
+    radial-gradient(50% 45% at 85% 10%, rgb(2 132 199 / 0.12), transparent 70%),
+    radial-gradient(45% 40% at 70% 95%, rgb(13 148 136 / 0.12), transparent 70%),
+    #f2f8fa;
+}
+[data-theme="light"] .landing .hero-panel .neon-text {
+  background-image: linear-gradient(110deg, #ffffff, #ccfbf1 50%, #e0f2fe);
 }
 
 @keyframes neon-drift {

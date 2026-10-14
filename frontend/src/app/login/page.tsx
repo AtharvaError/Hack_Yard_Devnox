@@ -10,9 +10,9 @@ import { api, type User } from "@/lib/api";
 type Demo = { label: string; email: string; password: string };
 
 const POINTS = [
-  { icon: Activity, title: "Live risk scores", text: "Every hospital, road, bridge, substation and water facility", color: "#00e5ff" },
-  { icon: GitFork, title: "Cascade simulation", text: "See what fails next when one asset goes down", color: "#7c5cff" },
-  { icon: ListChecks, title: "Ranked action plan", text: "The best moves for your budget and crews", color: "#ff3cac" },
+  { icon: Activity, title: "Live risk scores", text: "Every hospital, road, bridge, substation and water facility", color: "var(--color-accent)" },
+  { icon: GitFork, title: "Cascade simulation", text: "See what fails next when one asset goes down", color: "var(--color-accent-2)" },
+  { icon: ListChecks, title: "Ranked action plan", text: "The best moves for your budget and crews", color: "var(--color-accent-3)" },
 ];
 
 // A stylised city network for the hero: assets coloured by risk, with live links between them.
@@ -47,8 +47,8 @@ function HeroNetwork() {
       <svg viewBox="0 0 600 440" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full opacity-80">
         <defs>
           <linearGradient id="link" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#00e5ff" />
-            <stop offset="1" stopColor="#ff3cac" />
+            <stop offset="0" stopColor="var(--color-accent)" />
+            <stop offset="1" stopColor="var(--color-accent-2)" />
           </linearGradient>
           <radialGradient id="fade" cx="0.5" cy="0.5" r="0.6">
             <stop offset="0" stopColor="#fff" />
@@ -61,7 +61,7 @@ function HeroNetwork() {
         <g mask="url(#fadeMask)">
           {LINKS.map(([a, b]) => (
             <g key={`${a}-${b}`}>
-              <line x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y} stroke="#7c5cff" strokeOpacity="0.18" strokeWidth="1" />
+              <line x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y} stroke="var(--color-accent-2)" strokeOpacity="0.22" strokeWidth="1" />
               <line
                 className="net-flow"
                 x1={NODES[a].x}
@@ -90,7 +90,7 @@ function HeroNetwork() {
         <div
           key={c.text}
           className="float-y absolute rounded-xl border bg-bg/70 px-3 py-2 text-xs backdrop-blur-md"
-          style={{ ...c.style, borderColor: `${c.color}66`, boxShadow: `0 0 24px -8px ${c.color}`, animationDelay: c.delay }}
+          style={{ ...c.style, borderColor: `color-mix(in srgb, ${c.color} 40%, transparent)`, boxShadow: `0 0 24px -8px ${c.color}`, animationDelay: c.delay }}
         >
           <div className="font-medium text-ink">{c.text}</div>
           <div className="mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: c.color }}>
@@ -137,7 +137,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
+    <div className="landing grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
       <div className="hero-panel relative m-3 mr-0 hidden overflow-hidden rounded-3xl border border-ink/5 lg:flex">
         <HeroNetwork />
         <div className="hero-shade pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06071a] via-transparent to-[#06071a]/70" />
@@ -147,8 +147,7 @@ export default function LoginPage() {
           <Logo size={48} textClass="text-[26px]" />
         </div>
         <div className="relative">
-          <div className="eyebrow">Hackyard Build 2026 · Team Devnox</div>
-          <h1 className="mt-3 max-w-xl text-[44px] leading-[1.05] font-bold">
+          <h1 className="max-w-xl text-[44px] leading-[1.05] font-bold">
             Know which infrastructure will fail <span className="neon-text">before the weather arrives.</span>
           </h1>
           <div className="mt-8 grid max-w-2xl grid-cols-3 gap-3">
@@ -156,7 +155,7 @@ export default function LoginPage() {
               <div key={p.title} className="tile p-4" style={{ "--tone": p.color } as React.CSSProperties}>
                 <span
                   className="grid h-9 w-9 place-items-center rounded-xl"
-                  style={{ color: p.color, background: `${p.color}1a`, boxShadow: `0 0 20px -6px ${p.color}` }}
+                  style={{ color: p.color, background: `color-mix(in srgb, ${p.color} 10%, transparent)`, boxShadow: `0 0 20px -6px ${p.color}` }}
                 >
                   <p.icon size={18} />
                 </span>
