@@ -2,11 +2,12 @@
 
 import {
   Bell, FileText, Flag, GitFork, LayoutDashboard, ListChecks, LogOut, Map, Navigation,
-  Server, Settings, ShieldAlert, Users, Zap, type LucideIcon,
+  Server, Settings, Users, Zap, type LucideIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/Logo";
 import { type TextKey, useT } from "@/lib/i18n";
 import { timeAgo } from "@/lib/labels";
 import { useApp } from "@/lib/store";
@@ -80,13 +81,8 @@ export function Sidebar() {
   return (
     // Fixed to the viewport height and never scrolls; only the main area scrolls.
     <aside className="no-print hidden h-screen w-60 md:flex shrink-0 flex-col overflow-hidden border-r border-line bg-side px-3 py-4">
-      <Link href="/dashboard" className="mb-4 flex items-center gap-2 px-2">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent/20 text-accent">
-          <ShieldAlert size={18} />
-        </span>
-        <span className="text-lg font-semibold tracking-tight">
-          Infra<span className="text-accent">Sentinel</span>
-        </span>
+      <Link href="/dashboard" className="mb-4 px-2" aria-label="InfraSentinel home">
+        <Logo size={34} />
       </Link>
 
       <nav className="flex min-h-0 flex-1 flex-col gap-3">

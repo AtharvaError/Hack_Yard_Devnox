@@ -1,8 +1,9 @@
 "use client";
 
-import { Activity, GitFork, ListChecks, Loader2, ShieldAlert } from "lucide-react";
+import { Activity, GitFork, ListChecks, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/Logo";
 import { api, type User } from "@/lib/api";
 
 type Demo = { label: string; email: string; password: string };
@@ -57,13 +58,8 @@ export default function LoginPage() {
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-side/90 via-side/25 to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-side/55 to-transparent" />
-        <div className="relative flex items-center gap-2.5">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/20 text-accent">
-            <ShieldAlert size={22} />
-          </span>
-          <span className="text-2xl font-semibold tracking-tight">
-            Infra<span className="text-accent">Sentinel</span>
-          </span>
+        <div className="relative">
+          <Logo size={46} textClass="text-2xl" />
         </div>
         <div className="relative">
           <h1 className="max-w-md text-4xl leading-tight font-semibold">

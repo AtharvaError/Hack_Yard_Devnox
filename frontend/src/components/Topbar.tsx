@@ -4,6 +4,7 @@ import { Bell, FlaskConical, History, Languages, Loader2, MapPin, Search, X } fr
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, type City, type Place } from "@/lib/api";
+import { LogoMark } from "@/components/Logo";
 import { LANGS, useLang } from "@/lib/i18n";
 import { HORIZONS } from "@/lib/labels";
 import { useApp } from "@/lib/store";
@@ -197,6 +198,9 @@ export function Topbar() {
 
   return (
     <header className="no-print flex h-16 shrink-0 items-center gap-2 border-b border-line px-3 md:gap-4 md:px-6">
+      <Link href="/dashboard" aria-label="InfraSentinel home" className="md:hidden">
+        <LogoMark size={32} decorative />
+      </Link>
       <div className="hidden min-w-0 shrink-0 lg:block">
         <div className="flex items-center gap-2 text-sm font-semibold">
           Welcome, {user.name}

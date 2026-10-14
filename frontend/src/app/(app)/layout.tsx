@@ -1,8 +1,9 @@
 "use client";
 
-import { Loader2, MapPinned } from "lucide-react";
+import { MapPinned } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/Logo";
 import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
 import { CitySearch, Topbar } from "@/components/Topbar";
@@ -17,7 +18,7 @@ function Content({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid h-full place-items-center">
         <div className="card max-w-md p-8 text-center">
-          <Loader2 size={30} className="mx-auto animate-spin text-accent" />
+          <LogoMark size={56} decorative className="mx-auto" />
           <h2 className="mt-4 text-lg font-semibold">Building the risk model for {loadingCity}</h2>
           <p className="mt-2 text-sm text-muted">
             Fetching infrastructure from OpenStreetMap, terrain from the Copernicus elevation model and the live
@@ -83,7 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) {
     return (
       <div className="grid h-screen place-items-center">
-        <Loader2 className="animate-spin text-accent" />
+        <LogoMark size={64} />
       </div>
     );
   }

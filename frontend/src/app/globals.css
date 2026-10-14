@@ -151,6 +151,50 @@ body {
   border-bottom-color: var(--color-panel-2) !important;
 }
 
+/* Logo: a radar sweep turns once every 4 s, each asset blips as it passes, the at-risk asset pulses. */
+.logo-sweep {
+  transform-box: view-box;
+  transform-origin: 32px 33px;
+  animation: logo-sweep 4s linear infinite;
+}
+@keyframes logo-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.logo-blip {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-blip 4s linear infinite;
+}
+@keyframes logo-blip {
+  0% {
+    opacity: 0.55;
+    transform: scale(2.1);
+  }
+  22%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+.logo-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-pulse 2s ease-out infinite;
+}
+@keyframes logo-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.3);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
